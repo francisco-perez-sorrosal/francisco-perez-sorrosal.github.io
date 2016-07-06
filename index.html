@@ -1,31 +1,31 @@
+---
+layout: default
+---
 
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>Francisco Perez-Sorrosal</title>
-		<!-- link to main stylesheet -->
-		<link rel="stylesheet" type="text/css" href="/css/main.css">
-	</head>
-	<body>
-		<nav>
-    		<ul>
-        		<li><a href="/">Home</a></li>
-	        	<li><a href="/about">About</a></li>
-        		<li><a href="/cv">CV</a></li>
-        		<li><a href="/blog">Blog</a></li>
-    		</ul>
-		</nav>
-		<div class="container">
-    		<div class="blurb">
-        		<h1>Francisco Perez-Sorrosal</h1>
-				<p>Software Developer<a href="/about">Read more about my life...</a></p>
-    		</div><!-- /.blurb -->
-		</div><!-- /.container -->
-		<footer>
-    		<ul>
-        		<li><a href="mailto:fperezsorrosal@gmail.com">email</a></li>
-        		<li><a href="https://github.com/francisco-perez-sorrosal">github.com/francisco-perez-sorrosal</a></li>
-			</ul>
-		</footer>
-	</body>
-</html>
+<div class="home">
+
+    <h1 class="page-heading">Posts</h1>
+
+    <ul class="post-list">
+        {% for post in site.posts %}
+        <li>
+            <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+
+            <h2>
+                <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+            </h2>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
+
+</div>
+
+<div class="search">
+    <form action="/search.html" method="get">
+        <label for="search_box">Search</label>
+        <input type="text" id="search_box" name="query">
+        <input type="submit" value="search">
+    </form>
+</div>

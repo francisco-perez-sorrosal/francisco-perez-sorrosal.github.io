@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "The First Release of Apache Omid is Here!"
+title:  "The Firstop Release of Apache Omid is Here!"
 date:   2016-06-27 05:08:00 -0700
 categories: hbase transactions first release apache omid
 ---

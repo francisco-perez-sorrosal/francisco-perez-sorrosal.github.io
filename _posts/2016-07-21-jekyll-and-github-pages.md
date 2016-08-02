@@ -5,7 +5,7 @@ date:   2016-07-21 23:30:00 -0700
 categories: jekyll github-pages github website tricks blog
 ---
 
-When some years ago I was exploring tools for generating web sites for a project I stumbled upon [Jekyll](https://jekyllrb.com/)].
+When some years ago I was exploring tools for generating web sites for a project I stumbled upon [Jekyll](https://jekyllrb.com/).
 In the end I didn't used Jekyll for that project (I opt for [Maven Site Plugin](https://maven.apache.org/plugins/maven-site-plugin/)
 + the [Fluido Skin](https://maven.apache.org/skins/) in the end). However, when I decided to start my webpage/blog
 in Github pages, I decided to start using Jekyll as it was the default no-brainer option.

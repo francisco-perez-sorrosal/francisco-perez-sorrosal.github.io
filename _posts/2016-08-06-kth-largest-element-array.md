@@ -5,7 +5,7 @@ date:   2016-08-06 11:35:00 -0700
 categories: algorithms arrays quicksort
 ---
 
-This wee, discussing about algorithms with my colleagues, one of my them came with a problem someone presented him 
+This week, discussing about algorithms with my colleagues, one of my them came with a problem someone presented him 
 during an interview process at some point. The problem is relatively simple to describe; given an unsorted array 
 of elements, find the largest that occupies position k (1 ≤ k ≤ array's length), which is also given as an input.
 

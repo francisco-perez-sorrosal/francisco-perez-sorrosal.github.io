@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e # halt script on error
 
-if [[ $TRAVIS_BRANCH == 'gh-pages' ]] ; then
+if [[ $TRAVIS_BRANCH == 'source' ]] ; then
   cd _site
   git init
 

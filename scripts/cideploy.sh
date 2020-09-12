@@ -14,7 +14,7 @@ if [[ $TRAVIS_BRANCH == 'source' ]] ; then
 
   # We redirect any output to
   # /dev/null to hide any sensitive credential data that might otherwise be exposed.
-  git push --force 'https://${GH_TOKEN}@github.com/francisco-perez-sorrosal/francisco-perez-sorrosal.github.io.git' master:master
+  git push --force https://${GH_TOKEN}@github.com/francisco-perez-sorrosal/francisco-perez-sorrosal.github.io.git master:master
 else
   echo 'Invalid branch. You can only deploy from gh-pages.'
   exit 1

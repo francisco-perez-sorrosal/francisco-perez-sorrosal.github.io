@@ -10,11 +10,9 @@ if [[ $TRAVIS_BRANCH == 'source' ]] ; then
   git add .
   git commit -m "Deploy"
 
-  ls -la
-
   # We redirect any output to
   # /dev/null to hide any sensitive credential data that might otherwise be exposed.
-  git push --force "https://${GH_TOKEN}@github.com/francisco-perez-sorrosal/francisco-perez-sorrosal.github.io.git" master:master
+  git push --force --quiet "https://${GH_TOKEN}@github.com/francisco-perez-sorrosal/francisco-perez-sorrosal.github.io.git" master:master > /dev/null 2>&1
 else
   echo 'Invalid branch. You can only deploy from gh-pages.'
   exit 1

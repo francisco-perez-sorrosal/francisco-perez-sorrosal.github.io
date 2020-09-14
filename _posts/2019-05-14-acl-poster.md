@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Paper Accepted as a Poster in ACL 2019: Hierarchical Transfer Learning for Multi-label Text Classification"
-date:   2019-05-11 11:35:00 -0700
+date:   2019-05-14 11:35:00 -0700
 categories: nlp deep learning pytorch hierarchical transfer learning
 ---
 

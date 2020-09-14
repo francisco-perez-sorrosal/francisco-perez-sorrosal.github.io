@@ -12,12 +12,12 @@ I'm also a contributor and committer in the [Omid](http://omid.incubator.apache.
 [Apache Software Foundation](http://www.apache.org/).
 
 As a research software engineer, I've developed incremental processing frameworks and other scalable services at
-[Yahoo](https://www.yahoo.com/). Also, for [BULL SAS France](http://www.bull.com/), I implemented the replication and
-recovery protocols for their JEE app. server, [JOnAS](https://en.wikipedia.org/wiki/JOnAS). I participated in multiple
-European and National (Spanish) research projects such as CumuloNimbo, ADAPT, S4All, AUTONOMIC and NEXOF. In all those
-projects, I designed and developed highly available and scalable architectures and systems; e.g. I implemented a
-transaction-aware replicated cache for application servers; I open-sourced versions of
-[JEE Activity Service and WS-CAF specs](http://forge.ow2.org/projects/jass/). and I built replication frameworks for
+[Yahoo](https://www.yahoo.com/). Also, for [Atos/BULL SAS France](http://www.bull.com/), I implemented the replication
+and recovery protocols for their JEE app. server, [JOnAS](https://en.wikipedia.org/wiki/JOnAS). I participated in
+multiple European and National (Spanish) research projects such as CumuloNimbo, ADAPT, S4All, AUTONOMIC and NEXOF. 
+In all those projects, I designed and developed highly available and scalable architectures and systems; e.g. I
+implemented a transaction-aware replicated cache for application servers; I open-sourced versions of 
+[JEE Activity Service and WS-CAF specs](http://download.forge.ow2.org/jass/). and I built replication frameworks for
 providing high-availability to stateful services. Last but not least, I've also worked as a freelance, developing a web
 application in Ruby on Rails.
 

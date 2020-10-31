@@ -8,13 +8,15 @@ categories: rust mdbook open-source
 Some time ago I started working on a couple of books to summarize ideas about AI and QC. I wanted to use a simple format
 for the text, like markdown, and I found the [mdBook project](https://github.com/rust-lang/mdBook). When I started using
 it, I almost immediately had the need to add a bibliography to reference papers/books from the text. Unfortunately,
-neither markdown nor the mdBook project itself provides features to deal with bibliographies, unless you start adding
-ugly html tags here and there.
+neither markdown nor the mdBook project itself provides features to deal with bibliographies in an easy way, unless you
+start adding ugly html tags here and there.
    
 So, after I got tired of adding manually the references and use html tags, I decided to contribute a solution for the
 mdBook project that supports adding `.bib` files from Latex (e.g. generated manually or with any tool to collect, 
 organize and cite articles/books such as [Zotero](https://www.zotero.org/) or [Mendeley Cite](https://www.mendeley.com/reference-management/mendeley-cite))
-and reference those cites from the markdown text in an easy way.
+and reference those cites from the markdown text in an easy way. People use to have these `.bib` files to keep their
+collected bibliographies during their research, work etc., so why not allow them to reuse the `.bib` files in their 
+mdBooks too?
 
 The first problem I faced was that the mdBook project was written in [Rust](https://www.rust-lang.org/), and I had no
 idea of that language. That wasn't a big deal, but what I really didn't want to do was the parsing of the `.bib` files. 
@@ -27,7 +29,7 @@ fits with the mdBook project philosophy and eases the task at hand.
 
 The usage is very simple: 
 
-1. You add your bibliography file in BibTex format to yourbook. To do this, you just add your 
+1st) You add your bibliography file in BibTex format to yourbook. To do this, you just add your 
 `.bib` file containing the bibliography items to the source root of your mdBook. Items in the `.bib` file look like this:
 
 ```bibtex
@@ -51,7 +53,7 @@ The usage is very simple:
 	note = {Number: 1 Publisher: Nature Publishing Group},
 }
 ```
-2. Then, you add the following configuration to the `book` section of the toml config file:
+2nd) Then, you add the following configuration to the `book` section of the toml config file:
 
 ```toml
 [book]
@@ -61,16 +63,24 @@ bibliography = "my_biblio.bib"
 ```
 
 The bibliography will appear as a separate section in your book. 
-3. Finally, you are ready to create references/citations in your markdown files to the citation-keys in the `.bib` file
+3rd) Finally, you are ready to create references/citations in your markdown files to the citation-keys in the `.bib` file
 using the following syntax:
 
-```hbs
+```markdown
 \{{#cite my-citation-key}}
 ``` 
 
-
 For now, only authors, title and date are shown in the generated bibliography, but any other field can be added with 
 very few effort.
+
+This is how the Bibliography is shown in the generated html book:
+
+![Bibliography]({{site.baseurl}}/post-images/2020-10-31-rust-mdbook-bib/bibliography.png)
+![Bibliography With Abstract]({{site.baseurl}}/post-images/2020-10-31-rust-mdbook-bib/bibliowithabstract.png)
+
+And a citation is shown like this:
+
+![Citation]({{site.baseurl}}/post-images/2020-10-31-rust-mdbook-bib/citation.png)
 
 After I had the code, some critical tests for the new feature, and everything formated as required by the mdBook, I opened
 a [new issue for the feature](https://github.com/rust-lang/mdBook/issues/1350) and I pushed [a new PR with my implementation](https://github.com/rust-lang/mdBook/pull/1351)

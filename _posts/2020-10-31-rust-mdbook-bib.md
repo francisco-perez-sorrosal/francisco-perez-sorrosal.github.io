@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "My first PR to Rust's mdBook Project to Support Bibliographies in Books"
+title:  "A PR to Rust's mdBook Project to Support BibTeX Bibliographies in Books"
 date:   2020-10-31 11:20:00 -0700
-categories: rust mdbook open-source
+categories: rust mdbook open-source bibtex bibliography markdown
 ---
 
 Some time ago I started working on a couple of books to summarize ideas about AI and QC. I wanted to use a simple format
@@ -63,10 +63,11 @@ bibliography = "my_biblio.bib"
 ```
 
 The bibliography will appear as a separate section in your book. 
+
 3rd) Finally, you are ready to create references/citations in your markdown files to the citation-keys in the `.bib` file
 using the following syntax:
 
-```markdown
+```
 {{#cite my-citation-key}}
 ``` 
 

@@ -67,7 +67,7 @@ The bibliography will appear as a separate section in your book.
 using the following syntax:
 
 ```markdown
-\{{#cite my-citation-key}}
+{{#cite my-citation-key}}
 ``` 
 
 For now, only authors, title and date are shown in the generated bibliography, but any other field can be added with 
@@ -76,6 +76,7 @@ very few effort.
 This is how the Bibliography is shown in the generated html book:
 
 ![Bibliography]({{site.baseurl}}/post-images/2020-10-31-rust-mdbook-bib/bibliography.png)
+
 ![Bibliography With Abstract]({{site.baseurl}}/post-images/2020-10-31-rust-mdbook-bib/bibliowithabstract.png)
 
 And a citation is shown like this:

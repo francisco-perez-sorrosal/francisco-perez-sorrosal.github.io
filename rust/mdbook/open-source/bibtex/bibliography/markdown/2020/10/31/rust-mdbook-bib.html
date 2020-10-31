@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>A PR to Rust&#39;s mdBook Project to Support BibTeX Bibliographies in Books</title>
+  <meta name="description" content="Some time ago I started working on a couple of books to summarize ideas about AI and QC. I wanted to use a simple formatfor the text, like markdown, and I fo...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://francisco-perez-sorrosal.github.io/rust/mdbook/open-source/bibtex/bibliography/markdown/2020/10/31/rust-mdbook-bib.html">
+  <link rel="alternate" type="application/rss+xml" title="Software Pieces" href="http://francisco-perez-sorrosal.github.io/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Software Pieces</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">Francisco Perez-Sorrosal</a>
+          
+        
+          
+          <a class="page-link" href="/cv/">Resumé</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">A PR to Rust's mdBook Project to Support BibTeX Bibliographies in Books</h1>
+    <p class="post-meta"><time datetime="2020-10-31T18:20:00+00:00" itemprop="datePublished">Oct 31, 2020</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>Some time ago I started working on a couple of books to summarize ideas about AI and QC. I wanted to use a simple format
+for the text, like markdown, and I found the <a href="https://github.com/rust-lang/mdBook">mdBook project</a>. When I started using
+it, I almost immediately had the need to add a bibliography to reference papers/books from the text. Unfortunately,
+neither markdown nor the mdBook project itself provides features to deal with bibliographies in an easy way, unless you
+start adding ugly html tags here and there.</p>
+
+<p>So, after I got tired of adding manually the references and use html tags, I decided to contribute a solution for the
+mdBook project that supports adding <code class="language-plaintext highlighter-rouge">.bib</code> files from Latex (e.g. generated manually or with any tool to collect, 
+organize and cite articles/books such as <a href="https://www.zotero.org/">Zotero</a> or <a href="https://www.mendeley.com/reference-management/mendeley-cite">Mendeley Cite</a>)
+and reference those cites from the markdown text in an easy way. People use to have these <code class="language-plaintext highlighter-rouge">.bib</code> files to keep their
+collected bibliographies during their research, work etc., so why not allow them to reuse the <code class="language-plaintext highlighter-rouge">.bib</code> files in their 
+mdBooks too?</p>
+
+<p>The first problem I faced was that the mdBook project was written in <a href="https://www.rust-lang.org/">Rust</a>, and I had no
+idea of that language. That wasn’t a big deal, but what I really didn’t want to do was the parsing of the <code class="language-plaintext highlighter-rouge">.bib</code> files. 
+Fortunately, I stumbled upon the <a href="https://github.com/charlesvdv/nom-bibtex">nom-bibtex</a> Rust library, which can parse 
+the entries found in the <a href="http://www.bibtex.org/Format/">BibTeX format description</a>. So, I decided to explore the
+internals of the mdBook project to find the right places to inject the new functionality without messing up the current
+structure of the project (chapters, etc.) and <code class="language-plaintext highlighter-rouge">learn</code> Rust at the same time, in order to provide a simple solution for 
+referencing/citing bibliography. In about a week or so, I had a solution developed in my spare time that I think that 
+fits with the mdBook project philosophy and eases the task at hand.</p>
+
+<p>The usage is very simple:</p>
+
+<p>1st) You add your bibliography file in BibTex format to yourbook. To do this, you just add your 
+<code class="language-plaintext highlighter-rouge">.bib</code> file containing the bibliography items to the source root of your mdBook. Items in the <code class="language-plaintext highlighter-rouge">.bib</code> file look like this:</p>
+
+<div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@article</span><span class="p">{</span><span class="nl">ven_brain-inspired_2020</span><span class="p">,</span>
+	<span class="na">title</span> <span class="p">=</span> <span class="s">{Brain-inspired replay for continual learning with artificial neural networks}</span><span class="p">,</span>
+	<span class="na">volume</span> <span class="p">=</span> <span class="s">{11}</span><span class="p">,</span>
+	<span class="na">rights</span> <span class="p">=</span> <span class="s">{2020 The Author(s)}</span><span class="p">,</span>
+	<span class="na">issn</span> <span class="p">=</span> <span class="s">{2041-1723}</span><span class="p">,</span>
+	<span class="na">url</span> <span class="p">=</span> <span class="s">{https://www.nature.com/articles/s41467-020-17866-2}</span><span class="p">,</span>
+	<span class="na">doi</span> <span class="p">=</span> <span class="s">{10.1038/s41467-020-17866-2}</span><span class="p">,</span>
+	<span class="na">abstract</span> <span class="p">=</span> <span class="s">{Artificial neural networks suffer from catastrophic forgetting. Unlike humans, when these networks are trained on something new, they rapidly forget what was learned before. In the brain, a mechanism thought to be important for protecting memories is the reactivation of neuronal activity patterns representing those memories. In artificial neural networks, such memory replay can be implemented as ‘generative replay’, which can successfully – and surprisingly efficiently – prevent catastrophic forgetting on toy examples even in a class-incremental learning scenario. However, scaling up generative replay to complicated problems with many tasks or complex inputs is challenging. We propose a new, brain-inspired variant of replay in which internal or hidden representations are replayed that are generated by the network’s own, context-modulated feedback connections. Our method achieves state-of-the-art performance on challenging continual learning benchmarks (e.g., class-incremental learning on {CIFAR}-100) without storing data, and it provides a novel model for replay in the brain. One challenge that faces artificial intelligence is the inability of deep neural networks to continuously learn new information without catastrophically forgetting what has been learnt before. To solve this problem, here the authors propose a replay-based algorithm for deep learning without the need to store data.}</span><span class="p">,</span>
+	<span class="na">pages</span> <span class="p">=</span> <span class="s">{1--14}</span><span class="p">,</span>
+	<span class="na">number</span> <span class="p">=</span> <span class="s">{1}</span><span class="p">,</span>
+	<span class="na">journaltitle</span> <span class="p">=</span> <span class="s">{Nature Communications}</span><span class="p">,</span>
+	<span class="na">author</span> <span class="p">=</span> <span class="s">{Ven, Gido M. van de and Siegelmann, Hava T. and Tolias, Andreas S.}</span><span class="p">,</span>
+	<span class="na">urldate</span> <span class="p">=</span> <span class="s">{2020-10-15}</span><span class="p">,</span>
+	<span class="na">date</span> <span class="p">=</span> <span class="s">{2020-08-13}</span><span class="p">,</span>
+	<span class="na">month</span> <span class="p">=</span> <span class="s">{jun}</span><span class="p">,</span>
+    <span class="na">year</span> <span class="p">=</span> <span class="s">{2020}</span><span class="p">,</span>
+	<span class="na">langid</span> <span class="p">=</span> <span class="s">{english}</span><span class="p">,</span>
+	<span class="na">note</span> <span class="p">=</span> <span class="s">{Number: 1 Publisher: Nature Publishing Group}</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>2nd) Then, you add the following configuration to the <code class="language-plaintext highlighter-rouge">book</code> section of the toml config file:</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[book]</span>
+<span class="err">...</span>
+<span class="py">bibliography</span> <span class="p">=</span> <span class="s">"my_biblio.bib"</span>
+<span class="err">...</span>
+</code></pre></div></div>
+
+<p>The bibliography will appear as a separate section in your book.</p>
+
+<p>3rd) Finally, you are ready to create references/citations in your markdown files to the citation-keys in the <code class="language-plaintext highlighter-rouge">.bib</code> file
+using the following syntax:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>\
+</code></pre></div></div>
+
+<p>For now, only authors, title and date are shown in the generated bibliography, but any other field can be added with 
+very few effort.</p>
+
+<p>This is how the Bibliography is shown in the generated html book:</p>
+
+<p><img src="/post-images/2020-10-31-rust-mdbook-bib/bibliography.png" alt="Bibliography" /></p>
+
+<p><img src="/post-images/2020-10-31-rust-mdbook-bib/bibliowithabstract.png" alt="Bibliography With Abstract" /></p>
+
+<p>And a citation is shown like this:</p>
+
+<p><img src="/post-images/2020-10-31-rust-mdbook-bib/citation.png" alt="Citation" /></p>
+
+<p>After I had the code, some critical tests for the new feature, and everything formated as required by the mdBook, I opened
+a <a href="https://github.com/rust-lang/mdBook/issues/1350">new issue for the feature</a> and I pushed <a href="https://github.com/rust-lang/mdBook/pull/1351">a new PR with my implementation</a></p>
+
+<p>If someone else finds it interesting, maybe it’ll go in the main branch at some point.</p>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Pieces</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>Resumé & Contact Information</li>
+          <li><a href="/cv">Francisco Perez-Sorrosal</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <a href="mailto:fperezsorrosal @ gmail.com">
+            <span class="icon">
+              <svg viewBox="0 0 14 14">
+                <path d="M7,9L5.268,7.484l-4.952,4.245C0.496,11.896,0.739,12,1.007,12h11.986 c0.267,0,0.509-0.104,0.688-0.271L8.732,7.484L7,9z M13.684,2.271C13.504,2.103,13.262,2,12.993,2H1.007C0.74,2,0.498,2.104,0.318,2.273L7,8 L13.684,2.271z"/>
+                <polygon points="0,2.878 0,11.186 4.833,7.079"/>
+                <polygon points="9.167,7.079 14,11.186 14,2.875"/>
+              </svg>
+            </span>
+            fperezsorrosal @ gmail.com
+          </a>
+          
+          
+          <li>
+            <a href="https://github.com/francisco-perez-sorrosal"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">francisco-perez-sorrosal</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/fperezsorrosal"><span class="icon icon--twitter"><svg viewBox="0 0 16 16"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">fperezsorrosal</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>This site contains bits and b[iy]tes of software I've compiled in the last few years. Hope this can be useful for other passionate software engineers.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

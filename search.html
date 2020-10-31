@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Software Pieces</title>
+  <meta name="description" content="This site contains bits and b[iy]tes of software I've compiled in the last few years. Hope this can be useful for other passionate software engineers.
+">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://francisco-perez-sorrosal.github.io/search.html">
+  <link rel="alternate" type="application/rss+xml" title="Software Pieces" href="http://francisco-perez-sorrosal.github.io/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Software Pieces</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">Francisco Perez-Sorrosal</a>
+          
+        
+          
+          <a class="page-link" href="/cv/">Resumé</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="search">
+    <form action="/search.html" method="get">
+    <label for="search-box">Search</label>
+    <input type="text" id="search-box" name="query">
+    <input type="submit" value="search">
+</form>
+
+<ul id="search-results"></ul>
+
+<script>
+  window.store = {
+    
+      "rust-mdbook-open-source-bibtex-bibliography-markdown-2020-10-31-rust-mdbook-bib-html": {
+        "title": "A PR to Rust's mdBook Project to Support BibTeX Bibliographies in Books",
+        "author": "",
+        "category": "",
+        "content": "Some time ago I started working on a couple of books to summarize ideas about AI and QC. I wanted to use a simple formatfor the text, like markdown, and I found the mdBook project. When I started usingit, I almost immediately had the need to add a bibliography to reference papers/books from the text. Unfortunately,neither markdown nor the mdBook project itself provides features to deal with bibliographies in an easy way, unless youstart adding ugly html tags here and there.So, after I got tired of adding manually the references and use html tags, I decided to contribute a solution for themdBook project that supports adding .bib files from Latex (e.g. generated manually or with any tool to collect, organize and cite articles/books such as Zotero or Mendeley Cite)and reference those cites from the markdown text in an easy way. People use to have these .bib files to keep theircollected bibliographies during their research, work etc., so why not allow them to reuse the .bib files in their mdBooks too?The first problem I faced was that the mdBook project was written in Rust, and I had noidea of that language. That wasn’t a big deal, but what I really didn’t want to do was the parsing of the .bib files. Fortunately, I stumbled upon the nom-bibtex Rust library, which can parse the entries found in the BibTeX format description. So, I decided to explore theinternals of the mdBook project to find the right places to inject the new functionality without messing up the currentstructure of the project (chapters, etc.) and learn Rust at the same time, in order to provide a simple solution for referencing/citing bibliography. In about a week or so, I had a solution developed in my spare time that I think that fits with the mdBook project philosophy and eases the task at hand.The usage is very simple:1st) You add your bibliography file in BibTex format to yourbook. To do this, you just add your .bib file containing the bibliography items to the source root of your mdBook. Items in the .bib file look like this:@article{ven_brain-inspired_2020,\ttitle = {Brain-inspired replay for continual learning with artificial neural networks},\tvolume = {11},\trights = {2020 The Author(s)},\tissn = {2041-1723},\turl = {https://www.nature.com/articles/s41467-020-17866-2},\tdoi = {10.1038/s41467-020-17866-2},\tabstract = {Artificial neural networks suffer from catastrophic forgetting. Unlike humans, when these networks are trained on something new, they rapidly forget what was learned before. In the brain, a mechanism thought to be important for protecting memories is the reactivation of neuronal activity patterns representing those memories. In artificial neural networks, such memory replay can be implemented as ‘generative replay’, which can successfully – and surprisingly efficiently – prevent catastrophic forgetting on toy examples even in a class-incremental learning scenario. However, scaling up generative replay to complicated problems with many tasks or complex inputs is challenging. We propose a new, brain-inspired variant of replay in which internal or hidden representations are replayed that are generated by the network’s own, context-modulated feedback connections. Our method achieves state-of-the-art performance on challenging continual learning benchmarks (e.g., class-incremental learning on {CIFAR}-100) without storing data, and it provides a novel model for replay in the brain. One challenge that faces artificial intelligence is the inability of deep neural networks to continuously learn new information without catastrophically forgetting what has been learnt before. To solve this problem, here the authors propose a replay-based algorithm for deep learning without the need to store data.},\tpages = {1--14},\tnumber = {1},\tjournaltitle = {Nature Communications},\tauthor = {Ven, Gido M. van de and Siegelmann, Hava T. and Tolias, Andreas S.},\turldate = {2020-10-15},\tdate = {2020-08-13},\tmonth = {jun},    year = {2020},\tlangid = {english},\tnote = {Number: 1 Publisher: Nature Publishing Group},}2nd) Then, you add the following configuration to the book section of the toml config file:[book]...bibliography = \"my_biblio.bib\"...The bibliography will appear as a separate section in your book.3rd) Finally, you are ready to create references/citations in your markdown files to the citation-keys in the .bib fileusing the following syntax:\\For now, only authors, title and date are shown in the generated bibliography, but any other field can be added with very few effort.This is how the Bibliography is shown in the generated html book:And a citation is shown like this:After I had the code, some critical tests for the new feature, and everything formated as required by the mdBook, I openeda new issue for the feature and I pushed a new PR with my implementationIf someone else finds it interesting, maybe it’ll go in the main branch at some point.",
+        "url": "/rust/mdbook/open-source/bibtex/bibliography/markdown/2020/10/31/rust-mdbook-bib.html"
+      }
+      ,
+    
+      "nlp-deep-learning-metrics-acl-best-paper-2020-09-10-acl-2020-best-paper-summary-html": {
+        "title": "ACL 2020 Best Paper Summary: Beyond Accuracy: Behavioral Testing of NLP models with CheckList",
+        "author": "",
+        "category": "",
+        "content": "I’ve done a summary of the paper “Beyond Accuracy: Behavioral Testing of NLP models with CheckList” byMarco Tulio Ribeiro, Tongshuang Wu, Carlos Guestrin and Sameer Singh. This paper won the Best-Papwer award inthe 2020 ACL conference.Summary💡 Goal of the paper: Present Checklist, a methodology and a tool for testing NLP models.Authors claim that…      … only ensuring that models fulfill benchmark accuracy is not enough to evaluate model quality in NLP        … by using similar techniques to those applied in SWE testing it is possible to reveal the “bad” quality of models that have passed the existing benchmarks in 3 different tasks        … their methodology and tools are easy to follow/use        … utility is guaranteed          they are able to find errors in battletested public comercial models      they show how users (both expert and newcomers) can benefit from the framework almost immediately            … open-source is the way to go, so…          Tool and all stuff described in the paper is is open sourced      They plan the community to start growing by sharing their experiences through new test suites and capabilities      Find my summary of the paper here in the form of a Jupyter notebook or just click here to start binder to access the presentation",
+        "url": "/nlp/deep/learning/metrics/acl/best/paper/2020/09/10/acl-2020-best-paper-summary.html"
+      }
+      ,
+    
+      "nlp-deep-learning-pytorch-hierarchical-transfer-2019-05-14-acl-poster-html": {
+        "title": "Paper Accepted as a Poster in ACL 2019: Hierarchical Transfer Learning for Multi-label Text Classification",
+        "author": "",
+        "category": "",
+        "content": "Happy to learn that our paper “Hierarchical Transfer Learning for Multi-label Text Classification”has been accepted as a poster in ACL 2019! Thanks and congrats Sidd, Cem &amp; Kostas!!!AbstractMulti-Label Hierarchical Text Classification (MLHTC) is the task of categorizing documents into one or more topics organized in an hierarchical taxonomy. MLHTC can be formulated by combining multiple binary classification problems withan independent classifier for each category. We propose a novel transfer learning based strategy, HTrans, where binary classifiers at lower levels in the hierarchy are initialized using parameters of the parent classifier and fine-tuned on the child category classification task. In HTrans, we use a Gated Recurrent Unit (GRU)-based deep learningarchitecture coupled with attention. Compared to binary classifiers trained from scratch, our HTrans approach results in significant improvements of 1% on micro-F1 and 3% on macro-F1 on the RCV1 dataset. Our experiments also show that binary classifiers trained from scratch are significantly better than single multi-label models.Citation@inproceedings{banerjee-etal-2019-hierarchical,    title = \"Hierarchical Transfer Learning for Multi-label Text Classification\",    author = \"Banerjee, Siddhartha  and      Akkaya, Cem  and      Perez-Sorrosal, Francisco  and      Tsioutsiouliklis, Kostas\",    booktitle = \"Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics\",    month = jul,    year = \"2019\",    address = \"Florence, Italy\",    publisher = \"Association for Computational Linguistics\",    url = \"https://www.aclweb.org/anthology/P19-1633\",    doi = \"10.18653/v1/P19-1633\",    pages = \"6295--6300\",}",
+        "url": "/nlp/deep/learning/pytorch/hierarchical/transfer/2019/05/14/acl-poster.html"
+      }
+      ,
+    
+      "grpc-netty-akka-rpc-remote-client-server-java-2016-09-25-comm-protocols-html": {
+        "title": "Communication Protocols and Frameworks for Writing Client-Server Apps",
+        "author": "",
+        "category": "",
+        "content": "Back in June, I decided to try some of the new versions of some of the well-know communication protocolsand frameworks for writing client-server applications with Java for having some base code/scaffoldingfor further use in my projects. The target protocols/frameworks are:  Netty (v4.1.1)  GRPC (v0.15.0) Uses Netty internally for communication and Protocol buffersfor making it client-server communication laguage independent.  Akka (v2.4.7) Uses Netty for communicating remote actors.In order to do that, I decided to create a client-server application that implements a silly time-service. Thegoal here was not to focus on the functionality of the service, but to try the different protocols.The server-side of the time service has multiple layers, and each one of them can be the target of the client request. The entry point for the client in the first layer of the server side offers the client the possibility to use either Netty or GRPC synchronously or asynchronously for getting the time. When making a request, the client can specify also the server-side layer from to get the time from, e.g. layer 0, 1, 2… Each layer has a local Akka actor that is responsible to get the time of the server and send it back to the previous layer. All intermediate layers but the last one in the pipeline have also a remote actor instance in order to forward the client request to the next layer if required.The following figure shows a diagram of a possible deployment of the client-server app:The source code of the application can be found in my Github under the comm-protocols project.For communicating client and server with Netty, I just decided to use a simple text-based protocol, with TIME  &amp; DONE messages forgetting the time from a specific layer and close the communication channel respectively. For GRPC, I defined a simple service withbasic protobuf messages mimicking the text protocol for the raw Netty implementation. The protobuf file with the protocol definition is shown below:12345678910111213141516171819202122232425262728293031syntax = \"proto3\";option java_multiple_files = true;option java_package = \"com.codeg33ks.processing\";option java_outer_classname = \"ControlProto\";// ------------------------------------------------ GRPC part ---------------------------------------------------------service TimeService {    // A simple RPC.    //    // Obtains the time from a server    rpc GetTime(TimeRequest) returns (TimeResponse) {}}// --------------------------------------------- End GRPC part --------------------------------------------------------// ------------------------------------------- Akka and GRPC part -----------------------------------------------------message TimeRequest {    int32 nodeLevel = 1;}message TimeResponse {    int64 time = 1;    string signature = 2;}// --------------------------------------------- End Akka part --------------------------------------------------------In order to deploy a server-side pipeline like the one shown in the figure above, these are the parameters that we shouldprovide:  For the Back Server in Layer 2          Run com.fps.rpc.server.BackServer class with parameters -actorSystemName backActorSystem2 -nodeLevel 2 -conf backServer2.This creates the actor system for layer 2 with the particular name and configuration provided.        For the Back Server in Layer 1          Run com.fps.rpc.server.BackServer class with parameters -actorSystemName backActorSystem1 -nodeLevel 1 -remoteActor akka.tcp://backActorSystem2@127.0.0.1:2553/user/timeOracle.  This creates the actor system for layer 1 with the particular name and configuration provided and stating that this  layer is communicating with the layer 2 through the remote actor specified.        For the entry Time Server in Layer 0          Run com.fps.rpc.FrontServer class with the default parameters (In the current version the forwarding actor it’s  hardcoded to communicate with the time server in the next layer akka.tcp://backActorSystem1@127.0.0.1:2552/user/timeOracle)      In order to try the service, two client implementations are provided, the raw Netty and the GRPC. These are the parameters required for each one of them:  For Netty          Run com.fps.rpc.client.MainClient class with parameters netty -serverHostPort localhost:64444 -nodeLevel 2. Of course, you  can try different node levels for changing the target layer.        For GRPC          Run com.fps.rpc.client.MainClient class with parameters grpc -serverHostPort localhost:65444 -nodeLevel 2 -requestType async.  As in the Netty client, we can specify the target layer and here also if we want to perform the request either synchronously or  asynchronously.      For example, when executing the GRPC client with the parameters specified above, we should see a response similar to this:Sep 25, 2016 1:44:30 PM io.grpc.internal.ManagedChannelImpl &lt;init&gt;INFO: [ManagedChannelImpl@598067a5] Created with target localhost:6544416/09/25 13:44:30 [main] INFO grpc.GRPCClient: GRPC channel created. Target host localhost:6544416/09/25 13:44:30 [main] INFO grpc.GRPCClient: Checking time asynchronously16/09/25 13:44:31 [grpc-default-executor-0] INFO grpc.GRPCClient: Time checked asynchronously: akka://backActorSystem2/user/timeOracle 2016-09-25 13:44:3116/09/25 13:44:31 [grpc-default-executor-0] INFO grpc.GRPCClient: Request CompletedSep 25, 2016 1:44:31 PM io.grpc.internal.ManagedChannelImpl maybeTerminateChannelINFO: [ManagedChannelImpl@598067a5] TerminatedIt is also possible to exercise the server side using telnet and text commands directly in the console. To do that,just:$ telnet localhost 64444Trying ::1...Connected to localhost.Escape character is '^]'.And then insert the commands in text like this:TIME 0You should get a responses like this:TIME 0akka://frontServerActorSystem/user/requestForwarder/oracle 2016-09-25 13:50:34TIME 1akka://backActorSystem1/user/timeOracle 2016-09-25 13:52:44TIME 2akka://backActorSystem2/user/timeOracle 2016-09-25 13:53:03To finish the client-server communication, the command DONE can be used in the telnet command.",
+        "url": "/grpc/netty/akka/rpc/remote/client/server/java/2016/09/25/comm-protocols.html"
+      }
+      ,
+    
+      "storm-twitter-omid-filter-heroku-howto-tutorial-2016-08-20-tweet-storm-html": {
+        "title": "TweetStorm: A Simple Storm App to Retweet and Filter Twitter Mentions",
+        "author": "",
+        "category": "",
+        "content": "When we open-sourced Omid in Apache back in April, we also opened a Twitteraccount to spread news and useful information about it @ApacheOmid.The first month, I was taking a look from time to time in order to see Tweets mentioning Omid or the account, retweets, etc. till I got bored about it, and I decided to create an application to do it for me.So I took the Twitter Hosebird Client and the Twitter4Jlibraries and I started working on it.I could have chosen to implement a standard Java standalone application, but I decided to use Apache Storm in order to have a simple (but useful at the same time) pet project that I could re-use in the future as a base with the minimum Storm scaffolding for other projects.The initial purpose of the application was very simple; just observe the stream of Tweets in Twitter, detect whensome of them mention @ApacheOmid and retweet them automatically. After this, I alsodecided to add a functionality to filter the retweet of those Tweets that could potentially include offensive termsassociated to @ApacheOmid and send a notification about these events to my personalTweeter account @fperezsorrosal.The TweetStorm application can be found in my Github account.The Storm topology is very simple and consists in a single Spout and 3 Bolts:  TwitterSuckerSpout: Connects with Twitter through the Hosebird lib and emits raw Tweets to the TwitterFilterBolt  TwitterFilterBolt: Inspects the received Tweets and checks for possible offensive terms associated to the @ApacheOmid mention. If the Tweet is not offensive, emits a value to the ReTwitterBolt. Otherwise, emits the value to the WatchDogBolt.  ReTwitterBolt: It’s responsible of retweeting the contents in the @ApacheOmid account using Twitter4J.  WatchDogBolt: It’s responsible of sending a notification to my personal Twitter account through Twitter4J lib.This piece of code shows the required wiring of those elements:123456789101112131415161718192021222324252627282930313233    private void configureTwitterSpout(TopologyBuilder topology) {        TwitterSuckerSpout.Config spoutConfig = new TwitterSuckerSpout.Config(this.config.getProperty(TW_CONSUMER_KEY),                                                                              this.config.getProperty(TW_CONSUMER_SECRET),                                                                              this.config.getProperty(TW_ACCESS_TOKEN),                                                                              this.config.getProperty(TW_ACCESS_SECRET),                                                                              this.config.getProperty(\"twitter.termsToObserve\"));        topology.setSpout(TWITTER_SUCKER_NAME, new TwitterSuckerSpout(spoutConfig));    }    private void configureBolts(TopologyBuilder topology) throws TwitterException {        TwitterFilterBolt.Config twitterFilterConfig = new TwitterFilterBolt.Config(this.config.getProperty(\"twitter.offensiveTerms\"));        topology.setBolt(TWITTER_FILTER_BOLT_NAME, new TwitterFilterBolt(twitterFilterConfig), 4).shuffleGrouping(TWITTER_SUCKER_NAME);        ReTwitterBolt.Config reTwitterConfig = new ReTwitterBolt.Config(this.config.getProperty(TW_CONSUMER_KEY),                                                                        this.config.getProperty(TW_CONSUMER_SECRET),                                                                        this.config.getProperty(TW_ACCESS_TOKEN),                                                                        this.config.getProperty(TW_ACCESS_SECRET));        topology.setBolt(RETWEET_BOLT_NAME, new ReTwitterBolt(reTwitterConfig), 4).shuffleGrouping(TWITTER_FILTER_BOLT_NAME,                                                                                                   NON_OFFENSIVE_TWEET_OUTPUT);        WatchDogBolt.Config notifierConfig = new WatchDogBolt.Config(this.config.getProperty(TW_CONSUMER_KEY),                                                                     this.config.getProperty(TW_CONSUMER_SECRET),                                                                     this.config.getProperty(TW_ACCESS_TOKEN),                                                                     this.config.getProperty(TW_ACCESS_SECRET),                                                                     this.config.getProperty(\"twitter.watchmen\"));        topology.setBolt(WATCHDOG_BOLT_NAME, new WatchDogBolt(notifierConfig), 4).shuffleGrouping(TWITTER_FILTER_BOLT_NAME,                                                                                                  OFFENSIVE_TWEET_OUTPUT);    }I made the OAuth configuration and the other application parameters configurable in the conf/config.properties file, so anyone can use it for her own purposes. The usage is very simple, just:1) Clone the repo$ git@github.com:francisco-perez-sorrosal/tweetstorm.git2) Configure the Twitter OAuth and related config in conf/config.properties file3) Compile the application and generate the jar file$ mvn clean install assembly:single4) Run the application$ java -jar tweetstorm-1.0-SNAPSHOT.jar conf/config.propertiesThe application can be deployed also in Heroku. It’s been a while since I had tried the Heroku platform and I wanted to try it again, so I downloaded the provided Toolbeltand I deployed in the app in there. The process was like a breeze. After you register your account, you have to basicallycreate an application environment in Heroku to host your app in the platform and deploy it:$ heroku heroku apps:create &lt;my-app-name&gt;In order to deploy it, we have to use the Maven plugin for Heroku (See the pom.xml file in the project):    &lt;plugin&gt;        &lt;groupId&gt;com.heroku.sdk&lt;/groupId&gt;        &lt;artifactId&gt;heroku-maven-plugin&lt;/artifactId&gt;        &lt;version&gt;1.0.3&lt;/version&gt;        &lt;configuration&gt;            &lt;appName&gt;my-app-id&lt;/appName&gt;            &lt;processTypes&gt;                &lt;worker&gt;java -jar tweetstorm-1.0-SNAPSHOT.jar conf/config.properties&lt;/worker&gt;            &lt;/processTypes&gt;            &lt;includeTarget&gt;false&lt;/includeTarget&gt;            &lt;includes&gt;                &lt;include&gt;tweetstorm-1.0-SNAPSHOT.jar&lt;/include&gt;                &lt;include&gt;conf/config.properties&lt;/include&gt;            &lt;/includes&gt;        &lt;/configuration&gt;    &lt;/plugin&gt;and deployed the app after compiling it with:$ mvn clean install assembly:single$ maven heroku:deployLater, you can check the remote logs through the Heroku Toolbelt with:$ heroku logs --app &lt;my-app-name&gt; -n 100As I said before, it was very easy and the app deployment process was like a breeze.Hope this post could also be useful for those of you that want to have a simple and quick introductionto Storm and application deployment in the cloud.",
+        "url": "/storm/twitter/omid/filter/heroku/howto/tutorial/2016/08/20/tweet-storm.html"
+      }
+      ,
+    
+      "algorithms-arrays-quicksort-2016-08-06-kth-largest-element-array-html": {
+        "title": "Finding the Kth Largest Element in an Unsorted Array",
+        "author": "",
+        "category": "",
+        "content": "This week, discussing about algorithms with my colleagues, one of my them came with a problem someone presented him during an interview process at some point. The problem is relatively simple to describe; given an unsorted array of elements, find the largest that occupies position k (1 ≤ k ≤ array’s length), which is also given as an input.In other words:Given this array [23, 1, 45, 20, 56, 75, 2, 56, 99, 53, 120] and k=2 the output should be 99.Intuitively the solution is simple, we sort the array and we access the kth element. If we use the QuickSort algorithm the Big O notation says that we can get that with a complexity that is O(n log n) for the average case of sorting the array + O(1) for accessing the kth element. So, O(n log n) in summary.The summary Wikipedia provides about the steps of the QuickSort algorithm is:  Choose a pivot in the array (an arbitrary element that use to be the one at the center of the array)  Partition: Move the elements with values &lt; than the pivot before the pivot, and all elements with values &gt; pivot after it. After this, the pivot should be in its final position.  Recursively apply steps 1 and 2 the subarray with smaller values and to the subarray with greater values.Just as a reminder, the following is the basic code for the QuickSort:123456789101112131415161718192021222324252627282930        void sort(int[] array, int firstIdx, int lastIdx) {            int i = firstIdx;            int j = lastIdx;            // Determine pivot element and value (middle index element in this case)            int pivot = array[firstIdx+(lastIdx-firstIdx)/2];            while (i &lt;= j) {                // Sort in ascending order                while (array[i] &lt; pivot) {                    i++;                }                while (array[j] &gt; pivot) {                    j--;                }                if (i &lt;= j) {                    swap(array, i++, j--);                }            }            // Recursive calls to sort each side of the array            if (firstIdx &lt; j)                sort(array, firstIdx, j);            if (i &lt; lastIdx)                sort(array, i, lastIdx);        }    }The time this solution takes (once the QuickSort algorithm has been adapted to order the elements in a descending order)is shown below:As we can see the time this solution takes is not appealing compared to other solutions in leetcode.com.So, can we do it better? Yes! If we take advantage of the fact that after the partitioning phase, the pivot is in its final position, we can prune the quickSort avoiding one of the recursive calls, as we’re interested only in sortingthe part of the array that contains the kth element.The following code shows what I did:123456789101112131415161718192021222324252627282930313233343536373839404142        private int prunedQuickSort(int[] array, int firstIdx, int lastIdx, int kth) {            int i = firstIdx;            int j = lastIdx;            // Determine pivot element (middle index element in this case)            int pivot;            if (array.length == 1 || array.length % 2 == 0) {                pivot = array[(firstIdx + (lastIdx - firstIdx) / 2)];            } else {                pivot = array[(firstIdx + (lastIdx - firstIdx) / 2 + 1)]; // Central element            }            // Scan left and right sides of the pivot and swap if necessary            while (i &lt;= j) {                while (array[i] &gt; pivot) {                    i++;                }                while (array[j] &lt; pivot) {                    j--;                }                if (i &lt;= j) {                    swap(array, i++, j--); // Post eval increment                }            }            // Recursive calls            if (firstIdx &lt; j &amp;&amp; kth &lt;= j) { // Look on the left side                return prunedQuickSort(array, firstIdx, j, kth);            } else {                if (i &lt; lastIdx &amp;&amp; kth &gt;= i) { // Look on the right side                    return prunedQuickSort(array, i, lastIdx, kth);                } else { // firstIdx == j == kth || i == lastIdx == kth &lt;-- this is the guy                    return array[kth];                }            }        }The main differences with the QuickSort algorithm shown above are:  We add a new parameter to the function arguments representingh the kth element (line 1)  We return the kth element value once we found it (also line 1)  Now we do order the array in the reverse order (line 17 and 21)  After the partition (lines 15-29) we’re just interested in the subarray that contains the kth position, so we prune the recursion in lines 32-40. We stop the recursion when we reach the subarray position that corresponds to  the kth element, which -as it is already sorted- should contain the value we are looking for (line 38).This time, this solution looks much better than before (181 vs 2 ms):I’ve dug a little bit into the literature, and this problem is generally know as the selection algorithm.According to the Wikipedia, a selection algorithm is an algorithm for finding the kth smallest number in a list orarray; such a number is called the kth order statistic. After skimming the article, it seems that the algorithm I coded corresponds to the section described as Partition-based selectionand with this approach, we can get a complexity that is O(n).You can find the complete code shown above in a Java project in here.",
+        "url": "/algorithms/arrays/quicksort/2016/08/06/kth-largest-element-array.html"
+      }
+      ,
+    
+      "git-commit-metadata-rewrite-tricks-2016-08-02-git-change-committer-data-html": {
+        "title": "Change Committer Information in Multiple Commits in Git",
+        "author": "",
+        "category": "",
+        "content": "At some point while I was working in a small project with a friend of mine, I realized that I was tagging my commits withthe wrong committer credentials. I didn’t changed the project’s git config file with the right data, so git was takingthe default data contained in the ~/.gitconfig file. I already had done multiple interleaved commits with myfriend’s, so it was not possible to make a simple amend to the last commit: git commit --amend --author \"Author &lt;new@email.com&gt;\" --no-editMoreover, the previous solution does not preserve the time of the commit, as it updates it to the current time.Fortunately we can use a combination of Git commands to perform the required task. We can use the filter-branch command with the --commitFilter argument to rewrite the Git revision history by rewriting the branches specified applying afilter all along the history: git filter-branch --commitFilter &lt;filter-command&gt; &lt;branch&gt;. The -f option can be used to force update the refs.The &lt;filter-command&gt; is introduced between ‘ symbols and can include Git variables such as GIT_AUTHOR_NAME or GIT_AUTHOR_EMAIL. So, as I wanted to change my commits, I had to look for the committer name and if it was me, changethe commit metadata accordingly to my new requirements. To create the new commit, we’ll use the Git commit-treecommand, which creates a new commit based on the provided tree object, emiting the new commit id on the standard output.I created a gist with a small shell script to automate the task:The output after executing the script is similar to this:Rewrite df3205e092bee16b3ae05a6e7c46847bf0a9ac0b (31/33) (2 seconds passed, remaining 0 predicted)Ref 'refs/heads/master' was rewrittenOnce the refs have been rewritten, we need to update the remote repo using the git push -f command to force the push.",
+        "url": "/git/commit/metadata/rewrite/tricks/2016/08/02/git-change-committer-data.html"
+      }
+      ,
+    
+      "jekyll-github-content-files-website-2016-07-25-jekyll-github-content-html": {
+        "title": "A Ruby Gem to add content of Github files ot Jekyll",
+        "author": "",
+        "category": "",
+        "content": "It’s been a while since last time I used Ruby, and I had the perfect excuse to come back to it when I was looking for a solution to inject content of Github files in Jekyll generated websites, and I could not find a github-pages solution to do that (there’s only a tag for including gists, but not a file or a part of it. See this)I took some inspiration in a Gem I found for including gistsand I started developing my own gem. I never developed a gem before, so I decided to download RubyMine and use thedefault template they have for that. With the help of the guides inrubygems.org, I adapted some minor stuff to make the .gemfile ready for my gem, so I was ready to start developing.I decided to create a single module (JekyllGithubContent) to encompass the classes of the Gem. Here is the resultingfile (injected using the gem :-):      Github file by francisco-perez-sorrosal        Repo: jekyll-github-content        File: lib/jekyll_github_content.rb Raw view  1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283848586878889909192939495# 3rd party libsrequire 'open-uri'require 'active_support'require 'liquid'module JekyllGithubContent  class GithubUriParser    GITHUB_URI_ROOT = 'https://github.com/'    GITHUB_RAW_URI_ROOT = 'https://raw.githubusercontent.com'    attr_reader :user, :repo, :file    def initialize(path)      relative_path = path.sub(/^https?\\:\\/\\//, '').sub(/^github.com/, '')      url_chunks = relative_path.split('/').delete_if { |e| e.empty? }      @user, @repo, blob, @branch = url_chunks[0..3]      @file = File.join(url_chunks[4..-1])    end    def get_raw_file_uri      File.join(GITHUB_RAW_URI_ROOT, @user, @repo, @branch, @file)    end    def get_user_uri      File.join(GITHUB_URI_ROOT, @user)    end    def get_repo_uri      File.join(GITHUB_URI_ROOT, @user, @repo)    end  end  class GithubContentRenderer &lt; ::Liquid::Tag    def initialize(tag_name, params, tokens)      path, @initial_line, @end_line = params.split      @github_file = GithubUriParser.new(path)      @initial_line, @end_line = parse_line_boundaries(@initial_line, @end_line)      super    end    def render(context)      file_lines = cache.fetch(@github_file.get_raw_file_uri) do        open(@github_file.get_raw_file_uri).readlines      end      lines_to_print = file_lines[@initial_line..@end_line]      lines_to_print.join    end    private # --------------------------------------------------------------------------------------------------------    def cache      @@cache ||= ActiveSupport::Cache::MemoryStore.new    end    def parse_line_boundaries(first_line, last_line)      if first_line.nil? &amp;&amp; last_line.nil?        first_line = 0        last_line = -1      elsif last_line.nil?        last_line = first_line      end      [first_line.to_i, last_line.to_i]    end  end  class GithubMetaContentRenderer &lt; GithubContentRenderer    def render(context)      &lt;&lt;DELIMITER.strip&lt;div class=\"github-file\"&gt;  &lt;div class=\"meta-info\"&gt;    Github file by &lt;a href=\"#{@github_file.get_user_uri}\"&gt;#{@github_file.user}&lt;/a&gt;    &lt;br&gt;    Repo: &lt;a href=\"#{@github_file.get_repo_uri}\"&gt;#{@github_file.repo}&lt;/a&gt;    &lt;br&gt;    File: #{@github_file.file} &lt;a href=\"#{@github_file.get_raw_file_uri}\"&gt;Raw view&lt;/a&gt;  &lt;/div&gt;&lt;/div&gt;DELIMITER    end  endend# Register the tag names in Liquid to allow code &amp; medadata insertion in Jekill markdown files# e.g. {% github_file &lt;my_file_url_in_github&gt; [start_line] [end_line] %}# e.g. {% github_fileref &lt;my_file_url_in_github&gt; %}Liquid::Template.register_tag('github_file', JekyllGithubContent::GithubContentRenderer)Liquid::Template.register_tag('github_fileref', JekyllGithubContent::GithubMetaContentRenderer)Basically the gem is composed by three classes. The code is very simple and auto-commented, so it’s not worth to addsomething else:  GithubUriParser - A parser that receives a path of a Github file and parses its contents for further use in the other 2 classes.  GithubContentRenderer - The responsible of rendering the file contents with the help of the previous class and theLiquid templating engine.  GithubMetaContentRenderer - An extension of the previous class that presents only the file metadata.Finally the last two lines (94 and 95), are responsible the register the two new tags defined by the gem in orderto inject the Github files. The Gem usage is described here.Once the gem was ready, I opened an account in https://rubygems.org/ and I added my gem to the repo:# Build the gem$ gem build jekyll_github_content.gemspec# Push it to the rubygems repo$ gem push jekyll_github_content-0.0.3.gem# Add your credentials and that's it!At some point I had to create new version, and I wanted to get rid of the old ones in the public repo. We can achievethat with gem yank jekyll_github_content -v 0.0.2.After installing and testing the gem locally with my Jekyll website, I was ready to commit the integration in myJekyll website, which consists only in adding the gem to the Gemfile as it’s shown below, again using the gem:      Github file by francisco-perez-sorrosal        Repo: francisco-perez-sorrosal.github.io        File: Gemfile Raw view  12345source 'https://rubygems.org'gem \"jekyll\"gem \"html-proofer\"gem 'github-pages', group: :jekyll_pluginsgem 'jekyll_github_content', '~&gt; 0.0.3', group: :jekyll_pluginsIn order to add the gem to the my github-pages website, as Github does not admit external gems, I had to generate the website statically as I described in this other blog post.",
+        "url": "/jekyll/github/content/files/website/2016/07/25/jekyll-github-content.html"
+      }
+      ,
+    
+      "jekyll-github-pages-github-website-tricks-blog-2016-07-22-jekyll-and-github-pages-html": {
+        "title": "Adventures with Jekyll and Github pages",
+        "author": "",
+        "category": "",
+        "content": "When some years ago I was exploring tools for generating web sites for a project I stumbled upon Jekyll.In the end I didn’t used Jekyll for that project (I opt for Maven Site Plugin  the Fluido Skin in the end). However, when I decided to start my webpage/blogin Github pages, I decided to start using Jekyll as it was the default no-brainer option.It was pretty easy and quick to start building the website and publish the contents to Github. These are the basic stepsonce you have installed Ruby in your system and created a project in Github for storing your website sources (note thatthe repo name should be .github.io):$ gem install jekyll$ jekyll new &lt;username&gt;.github.io$ cd &lt;username&gt;.github.io# Here you are supposed to add the content of your website, and when finishing, you push it to Github$ git init$ git remote add origin git@github.com/&lt;username&gt;/&lt;username&gt;.github.io$ git add .$ git commit -m \"First version of my website\"$ git pushAfter pushing, Github compiles the Jekyll website in your repo and generates automatically a static website, showing itunder the http://&lt;username&gt;.github.io domain name as my site is shown.So far, so good if you are not using Jekyll plugins or you use the standard github-pages plugins accepted by Github.For example, at some point, I wanted to generate the sitemap for my website, so I just had to include the jekyll-sitemapgem in the _config.yml file of Jekyll.However, I needed to add my own Gem containing a Jekyll plugin, so I had to generate locally the static content of mywebsite and push it to Github. That fact obliged me to change the way I organized the Github repo of the website. Aftertaking a look at different options I went for this one; the master branch will contain the static website generatedlocally and I would create a new branch source for holding the Jekyll code and the website sources and my docs.In order to do that, I first created the new branch source without including the _site directory, so I add that dirto the .gitignore. Then, I pushed the contents to the new branch in the remote repo and I track it locally. Afterthis step I had the important data in the new branch. Now, I had to take care of the generated static content of thewebsite that has to be shown through the Github pages. So, I cleaned up the contents in the _site dir, I removed themaster branch and I created a new repo tracking the remote  master branch locally, associated to thedirectory contents. This is the summary of the steps I had to do:$ cd &lt;username&gt;.github.io# Assuming we are in the master branch$ git checkout -b source# Now we're in the source branch$ echo _site/ &gt;&gt; .gitignore$ git add .$ git ci -m \"Do not keep track of _site dir\"$ git push --set-upstream origin source$ git branch -D master$ cd _site# Now we're in a directory that is not associated to git so...$ git init$ git remote add origin https://github.com/&lt;username&gt;/&lt;username&gt;.github.io$ git push -f --set-upstream origin masterSo now, pushes under the _site directory will update the website contents remotely. Let’s try it!# Assuming that we're still in the _site dir...$ cd ..# Now we should be in the root of the project in the source branch! Let's check it!$ git branch# Let's generate the static website...$ jekyll build# Now the new content should be in _site/ so...$ cd _site$ git add .$ git commit -m \"New version\"$ git pushAt this point, if we go to http://&lt;username&gt;.github.io we should see the new static website we’ve just generated andpushed to Github.So, we’ve seen how to separate the static content of our website from the Jekyll metadata and our metadata content intwo separate branches under our Github pages project. Apart of having to commit twice every time that you change thecontents of your website, this solution has another drawback; if we do a jekyll clean we’ll wipe out the contents of the _site dir, so we’ll have to generate again the repo and associate it with the remote master branch.",
+        "url": "/jekyll/github-pages/github/website/tricks/blog/2016/07/22/jekyll-and-github-pages.html"
+      }
+      ,
+    
+      "java-hiring-test-2011-facebook-dna-strings-2016-07-12-facebook-ribosome-html": {
+        "title": "Facebook Ribosome Hiring Test Revisited",
+        "author": "",
+        "category": "",
+        "content": "In Dec. 2011 I had an interview with Facebook. They proposed a coding testto decipher a DNA string extracting the proteins that were coded in it.It was a nice test to play with strings with Java. Some weeks later, I don’tknow why, I decided to re-code it. Despite I didn’t had the original text,I remembered enough details of the main function, so I took pen and paper and I added the resulting code to my gists in Github:Some days ago, I stumbled upon a github project of a guy that had the completetext describing the problem and some examples of DNA strings and resultingproteins. So I though that it was a nice opportunity to check what I didsome years ago :-) I wrote the required scaffolding and I checked my function.Apart from some minor stuff, the function passed without problems thetests. I like it because is concise and clear, at least compared to othersolutions that I’ve seen out there. Only 12 lines. And they could have been only 11 if I had returned a list of strings, but it was less convenient for the tests.You can find the problem description and the solution here.Also you can test it and play in just 3 lines. Concision!$ git clone git@github.com:francisco-perez-sorrosal/ribosome-facebook.git$ mvn clean install assembly:single$ java -jar ribosome-1.0-SNAPSHOT.jar dnastring1.txt",
+        "url": "/java/hiring/test/2011/facebook/dna/strings/2016/07/12/facebook-ribosome.html"
+      }
+      ,
+    
+      "transactions-hbase-slides-2016-hadoop-summit-omid-2016-07-04-omid-hadoop-summit-html": {
+        "title": "Omid Slides @ Hadoop Summit 2016 in San Jose",
+        "author": "",
+        "category": "",
+        "content": "Last Wednesday we presented Apache Omid at Hadoop Summit in San Jose. Despiteit was a post-lunch talk, there were around 45 people in the room and they asked several interesting questions atthe end. Some guys also raised the question about future plans for integration withApache Phoenix, so we will need to take a look at it.Find here the slides for the talkYou can find more information about Omid here or following theOmid Twitter account.",
+        "url": "/transactions/hbase/slides/2016/hadoop/summit/omid/2016/07/04/omid-hadoop-summit.html"
+      }
+      ,
+    
+      "hbase-transactions-first-release-apache-omid-2016-06-27-omid-release-html": {
+        "title": "The First Release of Apache Omid is Here!",
+        "author": "",
+        "category": "",
+        "content": "It’s finally here!!! We’ve just published the first release (0.8.2.0)of Omid in Apache!Apache Omid is a flexible, reliable, high performant and scalable transactional framework that allows Big Dataapplications to execute ACID transactions on top of MVCC key/value NoSQL datastores such as HBase.You can find more information about Omid here or following theOmid Twitter account.",
+        "url": "/hbase/transactions/first/release/apache/omid/2016/06/27/omid-release.html"
+      }
+      ,
+    
+      "unix-linux-shell-sort-2015-08-29-beautiful-sort-html": {
+        "title": "Sort and beautify column-based file",
+        "author": "",
+        "category": "",
+        "content": "Sort Options:  -n Numeric sort  -r Reverse result  -t Field separator. See [1]Column Options:  -ts Pretty print with char delimiter for columns. See also [1][1] Note: sort and column treat ‘\\t’ and other char delimiters  as a multi-byte character. In order to make it work, weshould place a $ before it, as it’s shown in the example.",
+        "url": "/unix/linux/shell/sort/2015/08/29/beautiful-sort.html"
+      }
+      ,
+    
+      "unix-linux-shell-http-request-response-time-performance-2012-06-04-http-call-resp-time-html": {
+        "title": "Response Time of HTTP Requests",
+        "author": "",
+        "category": "",
+        "content": "Curl is a very well-known tool to transfer data using different protocols (HTTP, IMAP, POP3, FTP…). We can measurethe response time of an HTTP request in millisecond resolution the curl way, like this:curl -s -w '\\nResponse Time \\t%{time_total} (secs)\\n' -o /dev/null http://example.comOptions:  -s Silent mode to not to show trash on screen  -w  Allows to specify a pattern that can include different variables: time_connect, time_pretransfer...  -o Redirect output, in this case to the trash can, as we use the -w to show the result we wantEchoping is a less well-known tool to test remote host with TCP, UDP protocols but we can also measure the responsetime of HTTP requests. This is the echoping way:echoping -v -h / example.comOptions:  -v Verbose  -h  Use the http protocol instead of ping for the url specified",
+        "url": "/unix/linux/shell/http/request/response/time/performance/2012/06/04/http-call-resp-time.html"
+      }
+      ,
+    
+      "java-arrays-matrix-spiral-recursion-2011-12-22-spiral-matrix-html": {
+        "title": "Spiral Matrix: The Pacman Way",
+        "author": "",
+        "category": "",
+        "content": "Three days ago, I was asked to implement a code to traverse a matrix in spiral during an interview process.There, I was very nervous and I started trying to figure out how to modify the indexes using nested loops in order toachieve the proposed goal. I was trying to achieve a concise and efficient code instead of finding first a simplesolution to the problem. ERROR. Of course, in the end I only achieved a completely mess in the blackboard.When I arrived home and I could think more clearly, I started coding this simple solution, which is based on recursionand a simple state machine that traverses the matrix like a Pac-Man eating the corresponding rows and columns in theright order. There are out there a lot of solutions more efficient and concise. But concise and efficient doesn’talways mean clear and simple. I think this solution is very very simple and what is more important these days, readable.Code that traverses a matrix in spiral using recursion and a simple state machine:",
+        "url": "/java/arrays/matrix/spiral/recursion/2011/12/22/spiral-matrix.html"
+      }
+      
+    
+  };
+</script>
+<script src="/js/lunr.min.js"></script>
+<script src="/js/search.js"></script>
+</div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Pieces</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>Resumé & Contact Information</li>
+          <li><a href="/cv">Francisco Perez-Sorrosal</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <a href="mailto:fperezsorrosal @ gmail.com">
+            <span class="icon">
+              <svg viewBox="0 0 14 14">
+                <path d="M7,9L5.268,7.484l-4.952,4.245C0.496,11.896,0.739,12,1.007,12h11.986 c0.267,0,0.509-0.104,0.688-0.271L8.732,7.484L7,9z M13.684,2.271C13.504,2.103,13.262,2,12.993,2H1.007C0.74,2,0.498,2.104,0.318,2.273L7,8 L13.684,2.271z"/>
+                <polygon points="0,2.878 0,11.186 4.833,7.079"/>
+                <polygon points="9.167,7.079 14,11.186 14,2.875"/>
+              </svg>
+            </span>
+            fperezsorrosal @ gmail.com
+          </a>
+          
+          
+          <li>
+            <a href="https://github.com/francisco-perez-sorrosal"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">francisco-perez-sorrosal</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/fperezsorrosal"><span class="icon icon--twitter"><svg viewBox="0 0 16 16"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">fperezsorrosal</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>This site contains bits and b[iy]tes of software I've compiled in the last few years. Hope this can be useful for other passionate software engineers.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

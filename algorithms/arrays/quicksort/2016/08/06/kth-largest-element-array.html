@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Finding the Kth Largest Element in an Unsorted Array</title>
+  <meta name="description" content="This week, discussing about algorithms with my colleagues, one of my them came with a problem someone presented him during an interview process at some point...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://francisco-perez-sorrosal.github.io/algorithms/arrays/quicksort/2016/08/06/kth-largest-element-array.html">
+  <link rel="alternate" type="application/rss+xml" title="Software Pieces" href="http://francisco-perez-sorrosal.github.io/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Software Pieces</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">Francisco Perez-Sorrosal</a>
+          
+        
+          
+          <a class="page-link" href="/cv/">Resumé</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Finding the Kth Largest Element in an Unsorted Array</h1>
+    <p class="post-meta"><time datetime="2016-08-06T18:35:00+00:00" itemprop="datePublished">Aug 6, 2016</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>This week, discussing about algorithms with my colleagues, one of my them came with a problem someone presented him 
+during an interview process at some point. The problem is relatively simple to describe; given an unsorted array 
+of elements, find the largest that occupies position k (1 ≤ k ≤ array’s length), which is also given as an input.</p>
+
+<p>In other words:</p>
+
+<p>Given this array <code class="language-plaintext highlighter-rouge">[23, 1, 45, 20, 56, 75, 2, 56, 99, 53, 120]</code> and <code class="language-plaintext highlighter-rouge">k=2</code> the output should be <code class="language-plaintext highlighter-rouge">99</code>.</p>
+
+<p>Intuitively the solution is simple, we sort the array and we access the kth element. If we use the <a href="https://en.wikipedia.org/wiki/Quicksort">QuickSort</a> 
+algorithm the <a href="https://en.wikipedia.org/wiki/Big_O_notation">Big O notation</a> says that we can get that with a complexity 
+that is <code class="language-plaintext highlighter-rouge">O(n log n)</code> for the average case of sorting the array + <code class="language-plaintext highlighter-rouge">O(1)</code> for accessing the kth element. So, <code class="language-plaintext highlighter-rouge">O(n log n)</code> in summary.</p>
+
+<p>The summary Wikipedia provides about the steps of the QuickSort algorithm is:</p>
+
+<ol>
+  <li>Choose a pivot in the array (an arbitrary element that use to be the one at the center of the array)</li>
+  <li>Partition: Move the elements with values &lt; than the pivot before the pivot, and all elements with values &gt; pivot 
+after it. After this, the pivot should be in its final position.</li>
+  <li>Recursively apply steps 1 and 2 the subarray with smaller values and to the subarray with greater values.</li>
+</ol>
+
+<p>Just as a reminder, the following is the basic code for the QuickSort:</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+</pre></td><td class="code"><pre>        <span class="kt">void</span> <span class="nf">sort</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">array</span><span class="o">,</span> <span class="kt">int</span> <span class="n">firstIdx</span><span class="o">,</span> <span class="kt">int</span> <span class="n">lastIdx</span><span class="o">)</span> <span class="o">{</span>
+
+            <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">firstIdx</span><span class="o">;</span>
+            <span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">lastIdx</span><span class="o">;</span>
+
+            <span class="c1">// Determine pivot element and value (middle index element in this case)</span>
+            <span class="kt">int</span> <span class="n">pivot</span> <span class="o">=</span> <span class="n">array</span><span class="o">[</span><span class="n">firstIdx</span><span class="o">+(</span><span class="n">lastIdx</span><span class="o">-</span><span class="n">firstIdx</span><span class="o">)/</span><span class="mi">2</span><span class="o">];</span>
+
+            <span class="k">while</span> <span class="o">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">j</span><span class="o">)</span> <span class="o">{</span>
+
+                <span class="c1">// Sort in ascending order</span>
+                <span class="k">while</span> <span class="o">(</span><span class="n">array</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">&lt;</span> <span class="n">pivot</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">i</span><span class="o">++;</span>
+                <span class="o">}</span>
+                <span class="k">while</span> <span class="o">(</span><span class="n">array</span><span class="o">[</span><span class="n">j</span><span class="o">]</span> <span class="o">&gt;</span> <span class="n">pivot</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">j</span><span class="o">--;</span>
+                <span class="o">}</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">j</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">swap</span><span class="o">(</span><span class="n">array</span><span class="o">,</span> <span class="n">i</span><span class="o">++,</span> <span class="n">j</span><span class="o">--);</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+
+            <span class="c1">// Recursive calls to sort each side of the array</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">firstIdx</span> <span class="o">&lt;</span> <span class="n">j</span><span class="o">)</span>
+                <span class="n">sort</span><span class="o">(</span><span class="n">array</span><span class="o">,</span> <span class="n">firstIdx</span><span class="o">,</span> <span class="n">j</span><span class="o">);</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">lastIdx</span><span class="o">)</span>
+                <span class="n">sort</span><span class="o">(</span><span class="n">array</span><span class="o">,</span> <span class="n">i</span><span class="o">,</span> <span class="n">lastIdx</span><span class="o">);</span>
+        <span class="o">}</span>
+
+    <span class="o">}</span>
+</pre></td></tr></tbody></table></code></pre></figure>
+
+<p>The time this solution takes (once the QuickSort algorithm has been adapted to order the elements in a descending order)
+is shown below:</p>
+
+<p><img src="/post-images/2016-08-06-kth-largest-element-array/QSTime.png" alt="Quick Sort Time" /></p>
+
+<p>As we can see the time this solution takes is not appealing compared to other solutions in <a href="https://leetcode.com">leetcode.com</a>.</p>
+
+<p>So, can we do it better? Yes! If we take advantage of the fact that after the partitioning phase, the pivot is in its 
+final position, we can prune the quickSort avoiding one of the recursive calls, as we’re interested only in sorting
+the part of the array that contains the kth element.</p>
+
+<p>The following code shows what I did:</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+</pre></td><td class="code"><pre>        <span class="kd">private</span> <span class="kt">int</span> <span class="nf">prunedQuickSort</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">array</span><span class="o">,</span> <span class="kt">int</span> <span class="n">firstIdx</span><span class="o">,</span> <span class="kt">int</span> <span class="n">lastIdx</span><span class="o">,</span> <span class="kt">int</span> <span class="n">kth</span><span class="o">)</span> <span class="o">{</span>
+
+            <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">firstIdx</span><span class="o">;</span>
+            <span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">lastIdx</span><span class="o">;</span>
+
+            <span class="c1">// Determine pivot element (middle index element in this case)</span>
+            <span class="kt">int</span> <span class="n">pivot</span><span class="o">;</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">array</span><span class="o">.</span><span class="na">length</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">array</span><span class="o">.</span><span class="na">length</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">pivot</span> <span class="o">=</span> <span class="n">array</span><span class="o">[(</span><span class="n">firstIdx</span> <span class="o">+</span> <span class="o">(</span><span class="n">lastIdx</span> <span class="o">-</span> <span class="n">firstIdx</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span><span class="o">)];</span>
+            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+                <span class="n">pivot</span> <span class="o">=</span> <span class="n">array</span><span class="o">[(</span><span class="n">firstIdx</span> <span class="o">+</span> <span class="o">(</span><span class="n">lastIdx</span> <span class="o">-</span> <span class="n">firstIdx</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)];</span> <span class="c1">// Central element</span>
+            <span class="o">}</span>
+
+            <span class="c1">// Scan left and right sides of the pivot and swap if necessary</span>
+            <span class="k">while</span> <span class="o">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">j</span><span class="o">)</span> <span class="o">{</span>
+
+                <span class="k">while</span> <span class="o">(</span><span class="n">array</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">&gt;</span> <span class="n">pivot</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">i</span><span class="o">++;</span>
+                <span class="o">}</span>
+
+                <span class="k">while</span> <span class="o">(</span><span class="n">array</span><span class="o">[</span><span class="n">j</span><span class="o">]</span> <span class="o">&lt;</span> <span class="n">pivot</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">j</span><span class="o">--;</span>
+                <span class="o">}</span>
+
+                <span class="k">if</span> <span class="o">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">j</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">swap</span><span class="o">(</span><span class="n">array</span><span class="o">,</span> <span class="n">i</span><span class="o">++,</span> <span class="n">j</span><span class="o">--);</span> <span class="c1">// Post eval increment</span>
+                <span class="o">}</span>
+
+            <span class="o">}</span>
+
+            <span class="c1">// Recursive calls</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">firstIdx</span> <span class="o">&lt;</span> <span class="n">j</span> <span class="o">&amp;&amp;</span> <span class="n">kth</span> <span class="o">&lt;=</span> <span class="n">j</span><span class="o">)</span> <span class="o">{</span> <span class="c1">// Look on the left side</span>
+                <span class="k">return</span> <span class="nf">prunedQuickSort</span><span class="o">(</span><span class="n">array</span><span class="o">,</span> <span class="n">firstIdx</span><span class="o">,</span> <span class="n">j</span><span class="o">,</span> <span class="n">kth</span><span class="o">);</span>
+            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">lastIdx</span> <span class="o">&amp;&amp;</span> <span class="n">kth</span> <span class="o">&gt;=</span> <span class="n">i</span><span class="o">)</span> <span class="o">{</span> <span class="c1">// Look on the right side</span>
+                    <span class="k">return</span> <span class="nf">prunedQuickSort</span><span class="o">(</span><span class="n">array</span><span class="o">,</span> <span class="n">i</span><span class="o">,</span> <span class="n">lastIdx</span><span class="o">,</span> <span class="n">kth</span><span class="o">);</span>
+                <span class="o">}</span> <span class="k">else</span> <span class="o">{</span> <span class="c1">// firstIdx == j == kth || i == lastIdx == kth &lt;-- this is the guy</span>
+                    <span class="k">return</span> <span class="n">array</span><span class="o">[</span><span class="n">kth</span><span class="o">];</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+
+        <span class="o">}</span>
+</pre></td></tr></tbody></table></code></pre></figure>
+
+<p>The main differences with the QuickSort algorithm shown above are:</p>
+
+<ol>
+  <li>We add a new parameter to the function arguments representingh the kth element (line 1)</li>
+  <li>We return the kth element value once we found it (also line 1)</li>
+  <li>Now we do order the array in the reverse order (line 17 and 21)</li>
+  <li>After the partition (lines 15-29) we’re just interested in the subarray that contains the kth position, so
+ we prune the recursion in lines 32-40. We stop the recursion when we reach the subarray position that corresponds to 
+ the kth element, which -as it is already sorted- should contain the value we are looking for (line 38).</li>
+</ol>
+
+<p>This time, this solution looks much better than before (181 vs 2 ms):</p>
+
+<p><img src="/post-images/2016-08-06-kth-largest-element-array/KTHTime.png" alt="Kth Largest Element Time" /></p>
+
+<p>I’ve dug a little bit into the literature, and this problem is generally know as the <a href="https://en.wikipedia.org/wiki/Selection_algorithm">selection algorithm</a>.
+According to the Wikipedia, <code class="language-plaintext highlighter-rouge">a selection algorithm is an algorithm for finding the kth smallest number in a list or
+array; such a number is called the kth order statistic.</code> After skimming the article, it seems that the algorithm I 
+coded corresponds to the section described as <a href="https://en.wikipedia.org/wiki/Selection_algorithm#Partition-based_selection">Partition-based selection</a>
+and with this approach, we can get a complexity that is O(n).</p>
+
+<p>You can find the complete code shown above in a Java project in <a href="https://github.com/francisco-perez-sorrosal/kthlargestelement">here</a>.</p>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Pieces</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>Resumé & Contact Information</li>
+          <li><a href="/cv">Francisco Perez-Sorrosal</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <a href="mailto:fperezsorrosal @ gmail.com">
+            <span class="icon">
+              <svg viewBox="0 0 14 14">
+                <path d="M7,9L5.268,7.484l-4.952,4.245C0.496,11.896,0.739,12,1.007,12h11.986 c0.267,0,0.509-0.104,0.688-0.271L8.732,7.484L7,9z M13.684,2.271C13.504,2.103,13.262,2,12.993,2H1.007C0.74,2,0.498,2.104,0.318,2.273L7,8 L13.684,2.271z"/>
+                <polygon points="0,2.878 0,11.186 4.833,7.079"/>
+                <polygon points="9.167,7.079 14,11.186 14,2.875"/>
+              </svg>
+            </span>
+            fperezsorrosal @ gmail.com
+          </a>
+          
+          
+          <li>
+            <a href="https://github.com/francisco-perez-sorrosal"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">francisco-perez-sorrosal</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/fperezsorrosal"><span class="icon icon--twitter"><svg viewBox="0 0 16 16"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">fperezsorrosal</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>This site contains bits and b[iy]tes of software I've compiled in the last few years. Hope this can be useful for other passionate software engineers.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

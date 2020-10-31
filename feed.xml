@@ -1,0 +1,1331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Software Pieces</title>
+    <description>This site contains bits and b[iy]tes of software I've compiled in the last few years. Hope this can be useful for other passionate software engineers.
+</description>
+    <link>http://francisco-perez-sorrosal.github.io/</link>
+    <atom:link href="http://francisco-perez-sorrosal.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Sat, 31 Oct 2020 19:43:18 +0000</pubDate>
+    <lastBuildDate>Sat, 31 Oct 2020 19:43:18 +0000</lastBuildDate>
+    <generator>Jekyll v3.9.0</generator>
+    
+      <item>
+        <title>A PR to Rust's mdBook Project to Support BibTeX Bibliographies in Books</title>
+        <description>&lt;p&gt;Some time ago I started working on a couple of books to summarize ideas about AI and QC. I wanted to use a simple format
+for the text, like markdown, and I found the &lt;a href=&quot;https://github.com/rust-lang/mdBook&quot;&gt;mdBook project&lt;/a&gt;. When I started using
+it, I almost immediately had the need to add a bibliography to reference papers/books from the text. Unfortunately,
+neither markdown nor the mdBook project itself provides features to deal with bibliographies in an easy way, unless you
+start adding ugly html tags here and there.&lt;/p&gt;
+
+&lt;p&gt;So, after I got tired of adding manually the references and use html tags, I decided to contribute a solution for the
+mdBook project that supports adding &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.bib&lt;/code&gt; files from Latex (e.g. generated manually or with any tool to collect, 
+organize and cite articles/books such as &lt;a href=&quot;https://www.zotero.org/&quot;&gt;Zotero&lt;/a&gt; or &lt;a href=&quot;https://www.mendeley.com/reference-management/mendeley-cite&quot;&gt;Mendeley Cite&lt;/a&gt;)
+and reference those cites from the markdown text in an easy way. People use to have these &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.bib&lt;/code&gt; files to keep their
+collected bibliographies during their research, work etc., so why not allow them to reuse the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.bib&lt;/code&gt; files in their 
+mdBooks too?&lt;/p&gt;
+
+&lt;p&gt;The first problem I faced was that the mdBook project was written in &lt;a href=&quot;https://www.rust-lang.org/&quot;&gt;Rust&lt;/a&gt;, and I had no
+idea of that language. That wasn’t a big deal, but what I really didn’t want to do was the parsing of the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.bib&lt;/code&gt; files. 
+Fortunately, I stumbled upon the &lt;a href=&quot;https://github.com/charlesvdv/nom-bibtex&quot;&gt;nom-bibtex&lt;/a&gt; Rust library, which can parse 
+the entries found in the &lt;a href=&quot;http://www.bibtex.org/Format/&quot;&gt;BibTeX format description&lt;/a&gt;. So, I decided to explore the
+internals of the mdBook project to find the right places to inject the new functionality without messing up the current
+structure of the project (chapters, etc.) and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;learn&lt;/code&gt; Rust at the same time, in order to provide a simple solution for 
+referencing/citing bibliography. In about a week or so, I had a solution developed in my spare time that I think that 
+fits with the mdBook project philosophy and eases the task at hand.&lt;/p&gt;
+
+&lt;p&gt;The usage is very simple:&lt;/p&gt;
+
+&lt;p&gt;1st) You add your bibliography file in BibTex format to yourbook. To do this, you just add your 
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.bib&lt;/code&gt; file containing the bibliography items to the source root of your mdBook. Items in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.bib&lt;/code&gt; file look like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-bibtex highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nc&quot;&gt;@article&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;ven_brain-inspired_2020&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;title&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{Brain-inspired replay for continual learning with artificial neural networks}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;volume&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{11}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;rights&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{2020 The Author(s)}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;issn&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{2041-1723}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;url&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{https://www.nature.com/articles/s41467-020-17866-2}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;doi&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{10.1038/s41467-020-17866-2}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;abstract&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{Artificial neural networks suffer from catastrophic forgetting. Unlike humans, when these networks are trained on something new, they rapidly forget what was learned before. In the brain, a mechanism thought to be important for protecting memories is the reactivation of neuronal activity patterns representing those memories. In artificial neural networks, such memory replay can be implemented as ‘generative replay’, which can successfully – and surprisingly efficiently – prevent catastrophic forgetting on toy examples even in a class-incremental learning scenario. However, scaling up generative replay to complicated problems with many tasks or complex inputs is challenging. We propose a new, brain-inspired variant of replay in which internal or hidden representations are replayed that are generated by the network’s own, context-modulated feedback connections. Our method achieves state-of-the-art performance on challenging continual learning benchmarks (e.g., class-incremental learning on {CIFAR}-100) without storing data, and it provides a novel model for replay in the brain. One challenge that faces artificial intelligence is the inability of deep neural networks to continuously learn new information without catastrophically forgetting what has been learnt before. To solve this problem, here the authors propose a replay-based algorithm for deep learning without the need to store data.}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;pages&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{1--14}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;number&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{1}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;journaltitle&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{Nature Communications}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;author&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{Ven, Gido M. van de and Siegelmann, Hava T. and Tolias, Andreas S.}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;urldate&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{2020-10-15}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;date&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{2020-08-13}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;month&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{jun}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;year&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{2020}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;langid&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{english}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;na&quot;&gt;note&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;{Number: 1 Publisher: Nature Publishing Group}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;2nd) Then, you add the following configuration to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;book&lt;/code&gt; section of the toml config file:&lt;/p&gt;
+
+&lt;div class=&quot;language-toml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[book]&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;...&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;bibliography&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;my_biblio.bib&quot;&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;...&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The bibliography will appear as a separate section in your book.&lt;/p&gt;
+
+&lt;p&gt;3rd) Finally, you are ready to create references/citations in your markdown files to the citation-keys in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.bib&lt;/code&gt; file
+using the following syntax:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;\
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;For now, only authors, title and date are shown in the generated bibliography, but any other field can be added with 
+very few effort.&lt;/p&gt;
+
+&lt;p&gt;This is how the Bibliography is shown in the generated html book:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/post-images/2020-10-31-rust-mdbook-bib/bibliography.png&quot; alt=&quot;Bibliography&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/post-images/2020-10-31-rust-mdbook-bib/bibliowithabstract.png&quot; alt=&quot;Bibliography With Abstract&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;And a citation is shown like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/post-images/2020-10-31-rust-mdbook-bib/citation.png&quot; alt=&quot;Citation&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;After I had the code, some critical tests for the new feature, and everything formated as required by the mdBook, I opened
+a &lt;a href=&quot;https://github.com/rust-lang/mdBook/issues/1350&quot;&gt;new issue for the feature&lt;/a&gt; and I pushed &lt;a href=&quot;https://github.com/rust-lang/mdBook/pull/1351&quot;&gt;a new PR with my implementation&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;If someone else finds it interesting, maybe it’ll go in the main branch at some point.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 31 Oct 2020 18:20:00 +0000</pubDate>
+        <link>http://francisco-perez-sorrosal.github.io/rust/mdbook/open-source/bibtex/bibliography/markdown/2020/10/31/rust-mdbook-bib.html</link>
+        <guid isPermaLink="true">http://francisco-perez-sorrosal.github.io/rust/mdbook/open-source/bibtex/bibliography/markdown/2020/10/31/rust-mdbook-bib.html</guid>
+        
+        
+        <category>rust</category>
+        
+        <category>mdbook</category>
+        
+        <category>open-source</category>
+        
+        <category>bibtex</category>
+        
+        <category>bibliography</category>
+        
+        <category>markdown</category>
+        
+      </item>
+    
+      <item>
+        <title>ACL 2020 Best Paper Summary: Beyond Accuracy: Behavioral Testing of NLP models with CheckList</title>
+        <description>&lt;p&gt;I’ve done a summary of the paper “Beyond Accuracy: Behavioral Testing of NLP models with CheckList” by
+&lt;em&gt;Marco Tulio Ribeiro, Tongshuang Wu, Carlos Guestrin and Sameer Singh&lt;/em&gt;. This paper won the Best-Papwer award in
+the 2020 ACL conference.&lt;/p&gt;
+
+&lt;h1 id=&quot;summary&quot;&gt;Summary&lt;/h1&gt;
+
+&lt;p&gt;💡 &lt;strong&gt;Goal of the paper&lt;/strong&gt;: Present &lt;strong&gt;Checklist&lt;/strong&gt;, a &lt;em&gt;methodology and a tool&lt;/em&gt; for testing NLP models.&lt;/p&gt;
+
+&lt;p&gt;Authors claim that…&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;… only ensuring that models fulfill &lt;em&gt;benchmark accuracy&lt;/em&gt; &lt;strong&gt;is not enough to evaluate model quality in NLP&lt;/strong&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;… by using similar techniques to those applied in SWE testing it is possible to reveal the “bad” quality of
+ models that have passed the existing benchmarks in 3 different tasks&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;… their methodology and tools are easy to follow/use&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;… utility is guaranteed&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;they are able to find errors in battletested public comercial models&lt;/li&gt;
+      &lt;li&gt;they show how users (both expert and newcomers) can benefit from the framework almost immediately&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;… open-source is the way to go, so…&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;https://github.com/marcotcr/checklist&quot;&gt;Tool and all stuff described in the paper is is open sourced&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;They plan the community to start growing by sharing their experiences through new test suites and capabilities&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/francisco-perez-sorrosal/deep-learning-papers/tree/master/Beyond
+%20Accuracy&quot;&gt;Find my summary of the paper here&lt;/a&gt; 
+in the form of a Jupyter notebook or just &lt;a href=&quot;https://mybinder.org/v2/gh/francisco-perez-sorrosal/deep-learning-papers/master?filepath=Beyond%20Accuracy%2F2005.04118.ipynb&quot;&gt;click here to start binder&lt;/a&gt; to access the presentation&lt;/p&gt;
+</description>
+        <pubDate>Thu, 10 Sep 2020 23:45:00 +0000</pubDate>
+        <link>http://francisco-perez-sorrosal.github.io/nlp/deep/learning/metrics/acl/best/paper/2020/09/10/acl-2020-best-paper-summary.html</link>
+        <guid isPermaLink="true">http://francisco-perez-sorrosal.github.io/nlp/deep/learning/metrics/acl/best/paper/2020/09/10/acl-2020-best-paper-summary.html</guid>
+        
+        
+        <category>nlp</category>
+        
+        <category>deep</category>
+        
+        <category>learning</category>
+        
+        <category>metrics</category>
+        
+        <category>acl</category>
+        
+        <category>best</category>
+        
+        <category>paper</category>
+        
+      </item>
+    
+      <item>
+        <title>Paper Accepted as a Poster in ACL 2019: Hierarchical Transfer Learning for Multi-label Text Classification</title>
+        <description>&lt;p&gt;Happy to learn that our paper &lt;a href=&quot;https://www.aclweb.org/anthology/P19-1633/&quot;&gt;“Hierarchical Transfer Learning for Multi-label Text Classification”&lt;/a&gt;
+has been accepted as a poster in ACL 2019! Thanks and congrats Sidd, Cem &amp;amp; Kostas!!!&lt;/p&gt;
+
+&lt;h3 id=&quot;abstract&quot;&gt;Abstract&lt;/h3&gt;
+&lt;p&gt;Multi-Label Hierarchical Text Classification (MLHTC) is the task of categorizing documents into one or more topics 
+organized in an hierarchical taxonomy. MLHTC can be formulated by combining multiple binary classification problems with
+an independent classifier for each category. We propose a novel transfer learning based strategy, HTrans, where 
+binary classifiers at lower levels in the hierarchy are initialized using parameters of the parent classifier and 
+fine-tuned on the child category classification task. In HTrans, we use a Gated Recurrent Unit (GRU)-based deep learning
+architecture coupled with attention. Compared to binary classifiers trained from scratch, our HTrans approach results in 
+significant improvements of 1% on micro-F1 and 3% on macro-F1 on the RCV1 dataset. Our experiments also show that 
+binary classifiers trained from scratch are significantly better than single multi-label models.&lt;/p&gt;
+
+&lt;h3 id=&quot;citation&quot;&gt;Citation&lt;/h3&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@inproceedings{banerjee-etal-2019-hierarchical,
+    title = &quot;Hierarchical Transfer Learning for Multi-label Text Classification&quot;,
+    author = &quot;Banerjee, Siddhartha  and
+      Akkaya, Cem  and
+      Perez-Sorrosal, Francisco  and
+      Tsioutsiouliklis, Kostas&quot;,
+    booktitle = &quot;Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics&quot;,
+    month = jul,
+    year = &quot;2019&quot;,
+    address = &quot;Florence, Italy&quot;,
+    publisher = &quot;Association for Computational Linguistics&quot;,
+    url = &quot;https://www.aclweb.org/anthology/P19-1633&quot;,
+    doi = &quot;10.18653/v1/P19-1633&quot;,
+    pages = &quot;6295--6300&quot;,
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</description>
+        <pubDate>Tue, 14 May 2019 18:35:00 +0000</pubDate>
+        <link>http://francisco-perez-sorrosal.github.io/nlp/deep/learning/pytorch/hierarchical/transfer/2019/05/14/acl-poster.html</link>
+        <guid isPermaLink="true">http://francisco-perez-sorrosal.github.io/nlp/deep/learning/pytorch/hierarchical/transfer/2019/05/14/acl-poster.html</guid>
+        
+        
+        <category>nlp</category>
+        
+        <category>deep</category>
+        
+        <category>learning</category>
+        
+        <category>pytorch</category>
+        
+        <category>hierarchical</category>
+        
+        <category>transfer</category>
+        
+      </item>
+    
+      <item>
+        <title>Communication Protocols and Frameworks for Writing Client-Server Apps</title>
+        <description>&lt;p&gt;Back in June, I decided to try some of the new versions of some of the well-know communication protocols
+and frameworks for writing client-server applications with Java for having some base code/scaffolding
+for further use in my projects. The target protocols/frameworks are:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;http://netty.io/&quot;&gt;Netty&lt;/a&gt; (v4.1.1)&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.grpc.io/&quot;&gt;GRPC&lt;/a&gt; (v0.15.0) Uses Netty internally for communication and &lt;a href=&quot;https://developers.google.com/protocol-buffers/&quot;&gt;Protocol buffers&lt;/a&gt;
+for making it client-server communication laguage independent.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://akka.io/&quot;&gt;Akka&lt;/a&gt; (v2.4.7) Uses Netty for communicating remote actors.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;In order to do that, I decided to create a client-server application that implements a silly time-service. The
+goal here was not to focus on the functionality of the service, but to try the different protocols.&lt;/p&gt;
+
+&lt;p&gt;The server-side of the time service has multiple layers, and each one of them can be the target of the client request. 
+The entry point for the client in the first layer of the server side offers the client the possibility to use either 
+Netty or GRPC synchronously or asynchronously for getting the time. When making a request, the client can specify 
+also the server-side layer from to get the time from, e.g. layer 0, 1, 2… Each layer has a local Akka actor that 
+is responsible to get the time of the server and send it back to the previous layer. All intermediate layers but the 
+last one in the pipeline have also a remote actor instance in order to forward the client request to the next layer if required.&lt;/p&gt;
+
+&lt;p&gt;The following figure shows a diagram of a possible deployment of the client-server app:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/post-images/2016-09-25-comm-protocols/TimeApp.png&quot; alt=&quot;Multi-layer Time Server App&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The source code of the application can be found in my Github under the &lt;a href=&quot;https://github.com/francisco-perez-sorrosal/comm-protocols&quot;&gt;comm-protocols project&lt;/a&gt;.
+For communicating client and server with Netty, I just decided to use a simple text-based protocol, with TIME &lt;layer&gt; &amp;amp; DONE messages for
+getting the time from a specific layer and close the communication channel respectively. For GRPC, I defined a simple service with
+basic protobuf messages mimicking the text protocol for the raw Netty implementation. The protobuf file with the protocol definition is 
+shown below:&lt;/layer&gt;&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;table class=&quot;rouge-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;syntax&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;proto3&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;option&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;java_multiple_files&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;option&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;java_package&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;com.codeg33ks.processing&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;option&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;java_outer_classname&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;ControlProto&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// ------------------------------------------------ GRPC part ---------------------------------------------------------&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;service&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TimeService&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// A simple RPC.&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Obtains the time from a server&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;rpc&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;GetTime&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;TimeRequest&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;returns&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;TimeResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{}&lt;/span&gt;
+
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// --------------------------------------------- End GRPC part --------------------------------------------------------&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// ------------------------------------------- Akka and GRPC part -----------------------------------------------------&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TimeRequest&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;int32&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nodeLevel&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TimeResponse&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;int64&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;signature&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// --------------------------------------------- End Akka part --------------------------------------------------------&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;In order to deploy a server-side pipeline like the one shown in the figure above, these are the parameters that we should
+provide:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;For the Back Server in Layer 2
+    &lt;ul&gt;
+      &lt;li&gt;Run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;com.fps.rpc.server.BackServer&lt;/code&gt; class with parameters &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-actorSystemName backActorSystem2 -nodeLevel 2 -conf backServer2&lt;/code&gt;.
+This creates the actor system for layer 2 with the particular name and configuration provided.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;For the Back Server in Layer 1
+    &lt;ul&gt;
+      &lt;li&gt;Run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;com.fps.rpc.server.BackServer&lt;/code&gt; class with parameters &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-actorSystemName backActorSystem1 -nodeLevel 1 -remoteActor akka.tcp://backActorSystem2@127.0.0.1:2553/user/timeOracle&lt;/code&gt;.
+  This creates the actor system for layer 1 with the particular name and configuration provided and stating that this
+  layer is communicating with the layer 2 through the remote actor specified.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;For the entry Time Server in Layer 0
+    &lt;ul&gt;
+      &lt;li&gt;Run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;com.fps.rpc.FrontServer&lt;/code&gt; class with the default parameters (In the current version the forwarding actor it’s
+  hardcoded to communicate with the time server in the next layer &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;akka.tcp://backActorSystem1@127.0.0.1:2552/user/timeOracle&lt;/code&gt;)&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;In order to try the service, two client implementations are provided, the raw Netty and the GRPC. These are the parameters 
+required for each one of them:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;For Netty
+    &lt;ul&gt;
+      &lt;li&gt;Run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;com.fps.rpc.client.MainClient&lt;/code&gt; class with parameters &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netty -serverHostPort localhost:64444 -nodeLevel 2&lt;/code&gt;. Of course, you
+  can try different node levels for changing the target layer.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;For GRPC
+    &lt;ul&gt;
+      &lt;li&gt;Run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;com.fps.rpc.client.MainClient&lt;/code&gt; class with parameters &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;grpc -serverHostPort localhost:65444 -nodeLevel 2 -requestType async&lt;/code&gt;.
+  As in the Netty client, we can specify the target layer and here also if we want to perform the request either synchronously or
+  asynchronously.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;For example, when executing the GRPC client with the parameters specified above, we should see a response similar to this:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Sep 25, 2016 1:44:30 PM io.grpc.internal.ManagedChannelImpl &amp;lt;init&amp;gt;
+INFO: [ManagedChannelImpl@598067a5] Created with target localhost:65444
+16/09/25 13:44:30 [main] INFO grpc.GRPCClient: GRPC channel created. Target host localhost:65444
+16/09/25 13:44:30 [main] INFO grpc.GRPCClient: Checking time asynchronously
+16/09/25 13:44:31 [grpc-default-executor-0] INFO grpc.GRPCClient: Time checked asynchronously: akka://backActorSystem2/user/timeOracle 2016-09-25 13:44:31
+16/09/25 13:44:31 [grpc-default-executor-0] INFO grpc.GRPCClient: Request Completed
+Sep 25, 2016 1:44:31 PM io.grpc.internal.ManagedChannelImpl maybeTerminateChannel
+INFO: [ManagedChannelImpl@598067a5] Terminated
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;It is also possible to exercise the server side using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;telnet&lt;/code&gt; and text commands directly in the console. To do that,
+just:&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;telnet localhost 64444
+Trying ::1...
+Connected to localhost.
+Escape character is &lt;span class=&quot;s1&quot;&gt;'^]'&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And then insert the commands in text like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;TIME 0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You should get a responses like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;TIME 0
+akka://frontServerActorSystem/user/requestForwarder/oracle 2016-09-25 13:50:34
+
+TIME 1
+akka://backActorSystem1/user/timeOracle 2016-09-25 13:52:44
+
+TIME 2
+akka://backActorSystem2/user/timeOracle 2016-09-25 13:53:03
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;To finish the client-server communication, the command &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DONE&lt;/code&gt; can be used in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;telnet&lt;/code&gt; command.&lt;/p&gt;
+</description>
+        <pubDate>Sun, 25 Sep 2016 18:35:00 +0000</pubDate>
+        <link>http://francisco-perez-sorrosal.github.io/grpc/netty/akka/rpc/remote/client/server/java/2016/09/25/comm-protocols.html</link>
+        <guid isPermaLink="true">http://francisco-perez-sorrosal.github.io/grpc/netty/akka/rpc/remote/client/server/java/2016/09/25/comm-protocols.html</guid>
+        
+        
+        <category>grpc</category>
+        
+        <category>netty</category>
+        
+        <category>akka</category>
+        
+        <category>rpc</category>
+        
+        <category>remote</category>
+        
+        <category>client</category>
+        
+        <category>server</category>
+        
+        <category>java</category>
+        
+      </item>
+    
+      <item>
+        <title>TweetStorm: A Simple Storm App to Retweet and Filter Twitter Mentions</title>
+        <description>&lt;p&gt;When we open-sourced &lt;a href=&quot;https://omid.incubator.apache.org/&quot;&gt;Omid&lt;/a&gt; in Apache back in April, we also opened a Twitter
+account to spread news and useful information about it &lt;a href=&quot;https://twitter.com/ApacheOmid&quot;&gt;@ApacheOmid&lt;/a&gt;.
+The first month, I was taking a look from time to time in order to see Tweets mentioning Omid or the account, 
+retweets, etc. till I got bored about it, and I decided to create an application to do it for me.&lt;/p&gt;
+
+&lt;p&gt;So I took the &lt;a href=&quot;https://github.com/twitter/hbc&quot;&gt;Twitter Hosebird Client&lt;/a&gt; and the &lt;a href=&quot;http://twitter4j.org/en/&quot;&gt;Twitter4J&lt;/a&gt;
+libraries and I started working on it.&lt;/p&gt;
+
+&lt;p&gt;I could have chosen to implement a standard Java standalone application, but I decided to use &lt;a href=&quot;http://storm.apache.org/&quot;&gt;Apache Storm&lt;/a&gt; 
+in order to have a simple (but useful at the same time) pet project that I could re-use in the future as a base with 
+the minimum Storm scaffolding for other projects.&lt;/p&gt;
+
+&lt;p&gt;The initial purpose of the application was very simple; just observe the stream of Tweets in Twitter, detect when
+some of them mention &lt;a href=&quot;https://twitter.com/ApacheOmid&quot;&gt;@ApacheOmid&lt;/a&gt; and retweet them automatically. After this, I also
+decided to add a functionality to filter the retweet of those Tweets that could potentially include offensive terms
+associated to &lt;a href=&quot;https://twitter.com/ApacheOmid&quot;&gt;@ApacheOmid&lt;/a&gt; and send a notification about these events to my personal
+Tweeter account &lt;a href=&quot;https://twitter.com/fperezsorrosal&quot;&gt;@fperezsorrosal&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The TweetStorm application can be found in my &lt;a href=&quot;https://github.com/francisco-perez-sorrosal/tweetstorm&quot;&gt;Github account&lt;/a&gt;.
+The Storm topology is very simple and consists in a single Spout and 3 Bolts:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;TwitterSuckerSpout&lt;/code&gt;: Connects with Twitter through the Hosebird lib and emits raw Tweets to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;TwitterFilterBolt&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;TwitterFilterBolt&lt;/code&gt;: Inspects the received Tweets and checks for possible offensive terms associated to the 
+&lt;a href=&quot;https://twitter.com/ApacheOmid&quot;&gt;@ApacheOmid&lt;/a&gt; mention. If the Tweet is not offensive, emits a value to the 
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ReTwitterBolt&lt;/code&gt;. Otherwise, emits the value to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;WatchDogBolt&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ReTwitterBolt&lt;/code&gt;: It’s responsible of retweeting the contents in the &lt;a href=&quot;https://twitter.com/ApacheOmid&quot;&gt;@ApacheOmid&lt;/a&gt; account using Twitter4J.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;WatchDogBolt&lt;/code&gt;: It’s responsible of sending a notification to &lt;a href=&quot;https://twitter.com/fperezsorrosal&quot;&gt;my personal Twitter account&lt;/a&gt; through Twitter4J lib.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;This piece of code shows the required wiring of those elements:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;table class=&quot;rouge-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;configureTwitterSpout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;TopologyBuilder&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;topology&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+        &lt;span class=&quot;nc&quot;&gt;TwitterSuckerSpout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;Config&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;spoutConfig&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TwitterSuckerSpout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;Config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TW_CONSUMER_KEY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt;
+                                                                              &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TW_CONSUMER_SECRET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt;
+                                                                              &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TW_ACCESS_TOKEN&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt;
+                                                                              &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TW_ACCESS_SECRET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt;
+                                                                              &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;twitter.termsToObserve&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;topology&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setSpout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TWITTER_SUCKER_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TwitterSuckerSpout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spoutConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
+
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;configureBolts&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;TopologyBuilder&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;topology&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;throws&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TwitterException&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+
+        &lt;span class=&quot;nc&quot;&gt;TwitterFilterBolt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;Config&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;twitterFilterConfig&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TwitterFilterBolt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;Config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;twitter.offensiveTerms&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;topology&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setBolt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TWITTER_FILTER_BOLT_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TwitterFilterBolt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;twitterFilterConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;shuffleGrouping&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TWITTER_SUCKER_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+
+        &lt;span class=&quot;nc&quot;&gt;ReTwitterBolt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;Config&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reTwitterConfig&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ReTwitterBolt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;Config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TW_CONSUMER_KEY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt;
+                                                                        &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TW_CONSUMER_SECRET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt;
+                                                                        &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TW_ACCESS_TOKEN&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt;
+                                                                        &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TW_ACCESS_SECRET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;topology&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setBolt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;RETWEET_BOLT_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ReTwitterBolt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reTwitterConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;shuffleGrouping&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TWITTER_FILTER_BOLT_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+                                                                                                   &lt;span class=&quot;no&quot;&gt;NON_OFFENSIVE_TWEET_OUTPUT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+
+        &lt;span class=&quot;nc&quot;&gt;WatchDogBolt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;Config&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;notifierConfig&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WatchDogBolt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;Config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TW_CONSUMER_KEY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt;
+                                                                     &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TW_CONSUMER_SECRET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt;
+                                                                     &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TW_ACCESS_TOKEN&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt;
+                                                                     &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TW_ACCESS_SECRET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt;
+                                                                     &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;twitter.watchmen&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;topology&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setBolt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;WATCHDOG_BOLT_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WatchDogBolt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;notifierConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;shuffleGrouping&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;TWITTER_FILTER_BOLT_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+                                                                                                  &lt;span class=&quot;no&quot;&gt;OFFENSIVE_TWEET_OUTPUT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;I made the OAuth configuration and the other application parameters configurable in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;conf/config.properties&lt;/code&gt; file, so 
+anyone can use it for her own purposes. The usage is very simple, just:&lt;/p&gt;
+
+&lt;p&gt;1) Clone the repo&lt;/p&gt;
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git@github.com:francisco-perez-sorrosal/tweetstorm.git
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;2) Configure the Twitter OAuth and related config in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;conf/config.properties&lt;/code&gt; file&lt;/p&gt;
+
+&lt;p&gt;3) Compile the application and generate the jar file&lt;/p&gt;
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;mvn clean &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;assembly:single
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;4) Run the application&lt;/p&gt;
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;java &lt;span class=&quot;nt&quot;&gt;-jar&lt;/span&gt; tweetstorm-1.0-SNAPSHOT.jar conf/config.properties
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The application can be deployed also in &lt;a href=&quot;https://www.heroku.com/&quot;&gt;Heroku&lt;/a&gt;. It’s been a while since I had tried the 
+Heroku platform and I wanted to try it again, so I downloaded the provided &lt;a href=&quot;https://toolbelt.heroku.com/&quot;&gt;Toolbelt&lt;/a&gt;
+and I deployed in the app in there. The process was like a breeze. After you register your account, you have to basically
+create an application environment in Heroku to host your app in the platform and deploy it:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ heroku heroku apps:create &amp;lt;my-app-name&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In order to deploy it, we have to use the Maven plugin for Heroku (See the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pom.xml&lt;/code&gt; &lt;a href=&quot;https://github.com/francisco-perez-sorrosal/tweetstorm&quot;&gt;file in the project&lt;/a&gt;):&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &amp;lt;plugin&amp;gt;
+        &amp;lt;groupId&amp;gt;com.heroku.sdk&amp;lt;/groupId&amp;gt;
+        &amp;lt;artifactId&amp;gt;heroku-maven-plugin&amp;lt;/artifactId&amp;gt;
+        &amp;lt;version&amp;gt;1.0.3&amp;lt;/version&amp;gt;
+        &amp;lt;configuration&amp;gt;
+            &amp;lt;appName&amp;gt;my-app-id&amp;lt;/appName&amp;gt;
+            &amp;lt;processTypes&amp;gt;
+                &amp;lt;worker&amp;gt;java -jar tweetstorm-1.0-SNAPSHOT.jar conf/config.properties&amp;lt;/worker&amp;gt;
+            &amp;lt;/processTypes&amp;gt;
+            &amp;lt;includeTarget&amp;gt;false&amp;lt;/includeTarget&amp;gt;
+            &amp;lt;includes&amp;gt;
+                &amp;lt;include&amp;gt;tweetstorm-1.0-SNAPSHOT.jar&amp;lt;/include&amp;gt;
+                &amp;lt;include&amp;gt;conf/config.properties&amp;lt;/include&amp;gt;
+            &amp;lt;/includes&amp;gt;
+        &amp;lt;/configuration&amp;gt;
+    &amp;lt;/plugin&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;and deployed the app after compiling it with:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ mvn clean install assembly:single
+$ maven heroku:deploy
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Later, you can check the remote logs through the Heroku Toolbelt with:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ heroku logs --app &amp;lt;my-app-name&amp;gt; -n 100
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;As I said before, it was very easy and the app deployment process was like a breeze.&lt;/p&gt;
+
+&lt;p&gt;Hope this post could also be useful for those of you that want to have a simple and quick introduction
+to Storm and application deployment in the cloud.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 20 Aug 2016 18:35:00 +0000</pubDate>
+        <link>http://francisco-perez-sorrosal.github.io/storm/twitter/omid/filter/heroku/howto/tutorial/2016/08/20/tweet-storm.html</link>
+        <guid isPermaLink="true">http://francisco-perez-sorrosal.github.io/storm/twitter/omid/filter/heroku/howto/tutorial/2016/08/20/tweet-storm.html</guid>
+        
+        
+        <category>storm</category>
+        
+        <category>twitter</category>
+        
+        <category>omid</category>
+        
+        <category>filter</category>
+        
+        <category>heroku</category>
+        
+        <category>howto</category>
+        
+        <category>tutorial</category>
+        
+      </item>
+    
+      <item>
+        <title>Finding the Kth Largest Element in an Unsorted Array</title>
+        <description>&lt;p&gt;This week, discussing about algorithms with my colleagues, one of my them came with a problem someone presented him 
+during an interview process at some point. The problem is relatively simple to describe; given an unsorted array 
+of elements, find the largest that occupies position k (1 ≤ k ≤ array’s length), which is also given as an input.&lt;/p&gt;
+
+&lt;p&gt;In other words:&lt;/p&gt;
+
+&lt;p&gt;Given this array &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[23, 1, 45, 20, 56, 75, 2, 56, 99, 53, 120]&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;k=2&lt;/code&gt; the output should be &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;99&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Intuitively the solution is simple, we sort the array and we access the kth element. If we use the &lt;a href=&quot;https://en.wikipedia.org/wiki/Quicksort&quot;&gt;QuickSort&lt;/a&gt; 
+algorithm the &lt;a href=&quot;https://en.wikipedia.org/wiki/Big_O_notation&quot;&gt;Big O notation&lt;/a&gt; says that we can get that with a complexity 
+that is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;O(n log n)&lt;/code&gt; for the average case of sorting the array + &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;O(1)&lt;/code&gt; for accessing the kth element. So, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;O(n log n)&lt;/code&gt; in summary.&lt;/p&gt;
+
+&lt;p&gt;The summary Wikipedia provides about the steps of the QuickSort algorithm is:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Choose a pivot in the array (an arbitrary element that use to be the one at the center of the array)&lt;/li&gt;
+  &lt;li&gt;Partition: Move the elements with values &amp;lt; than the pivot before the pivot, and all elements with values &amp;gt; pivot 
+after it. After this, the pivot should be in its final position.&lt;/li&gt;
+  &lt;li&gt;Recursively apply steps 1 and 2 the subarray with smaller values and to the subarray with greater values.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Just as a reminder, the following is the basic code for the QuickSort:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;table class=&quot;rouge-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;        &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;sort&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;firstIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lastIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+            &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;firstIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+            &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lastIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Determine pivot element and value (middle index element in this case)&lt;/span&gt;
+            &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pivot&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;firstIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lastIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;firstIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)/&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;];&lt;/span&gt;
+
+            &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+                &lt;span class=&quot;c1&quot;&gt;// Sort in ascending order&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pivot&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++;&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pivot&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;--;&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;swap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;--);&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Recursive calls to sort each side of the array&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;firstIdx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;sort&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;firstIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lastIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;sort&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lastIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The time this solution takes (once the QuickSort algorithm has been adapted to order the elements in a descending order)
+is shown below:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/post-images/2016-08-06-kth-largest-element-array/QSTime.png&quot; alt=&quot;Quick Sort Time&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;As we can see the time this solution takes is not appealing compared to other solutions in &lt;a href=&quot;https://leetcode.com&quot;&gt;leetcode.com&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;So, can we do it better? Yes! If we take advantage of the fact that after the partitioning phase, the pivot is in its 
+final position, we can prune the quickSort avoiding one of the recursive calls, as we’re interested only in sorting
+the part of the array that contains the kth element.&lt;/p&gt;
+
+&lt;p&gt;The following code shows what I did:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;table class=&quot;rouge-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;        &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;prunedQuickSort&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;firstIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lastIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+            &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;firstIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+            &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lastIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Determine pivot element (middle index element in this case)&lt;/span&gt;
+            &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pivot&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;length&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;length&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;pivot&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;firstIdx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lastIdx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;firstIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)];&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;pivot&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;firstIdx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lastIdx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;firstIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)];&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Central element&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Scan left and right sides of the pivot and swap if necessary&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+                &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pivot&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++;&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+                &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pivot&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;--;&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+                &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;swap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;--);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Post eval increment&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Recursive calls&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;firstIdx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kth&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Look on the left side&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;prunedQuickSort&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;firstIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lastIdx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kth&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Look on the right side&lt;/span&gt;
+                    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;prunedQuickSort&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lastIdx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// firstIdx == j == kth || i == lastIdx == kth &amp;lt;-- this is the guy&lt;/span&gt;
+                    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;];&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The main differences with the QuickSort algorithm shown above are:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;We add a new parameter to the function arguments representingh the kth element (line 1)&lt;/li&gt;
+  &lt;li&gt;We return the kth element value once we found it (also line 1)&lt;/li&gt;
+  &lt;li&gt;Now we do order the array in the reverse order (line 17 and 21)&lt;/li&gt;
+  &lt;li&gt;After the partition (lines 15-29) we’re just interested in the subarray that contains the kth position, so
+ we prune the recursion in lines 32-40. We stop the recursion when we reach the subarray position that corresponds to 
+ the kth element, which -as it is already sorted- should contain the value we are looking for (line 38).&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;This time, this solution looks much better than before (181 vs 2 ms):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/post-images/2016-08-06-kth-largest-element-array/KTHTime.png&quot; alt=&quot;Kth Largest Element Time&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I’ve dug a little bit into the literature, and this problem is generally know as the &lt;a href=&quot;https://en.wikipedia.org/wiki/Selection_algorithm&quot;&gt;selection algorithm&lt;/a&gt;.
+According to the Wikipedia, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;a selection algorithm is an algorithm for finding the kth smallest number in a list or
+array; such a number is called the kth order statistic.&lt;/code&gt; After skimming the article, it seems that the algorithm I 
+coded corresponds to the section described as &lt;a href=&quot;https://en.wikipedia.org/wiki/Selection_algorithm#Partition-based_selection&quot;&gt;Partition-based selection&lt;/a&gt;
+and with this approach, we can get a complexity that is O(n).&lt;/p&gt;
+
+&lt;p&gt;You can find the complete code shown above in a Java project in &lt;a href=&quot;https://github.com/francisco-perez-sorrosal/kthlargestelement&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 06 Aug 2016 18:35:00 +0000</pubDate>
+        <link>http://francisco-perez-sorrosal.github.io/algorithms/arrays/quicksort/2016/08/06/kth-largest-element-array.html</link>
+        <guid isPermaLink="true">http://francisco-perez-sorrosal.github.io/algorithms/arrays/quicksort/2016/08/06/kth-largest-element-array.html</guid>
+        
+        
+        <category>algorithms</category>
+        
+        <category>arrays</category>
+        
+        <category>quicksort</category>
+        
+      </item>
+    
+      <item>
+        <title>Change Committer Information in Multiple Commits in Git</title>
+        <description>&lt;p&gt;At some point while I was working in a small project with a friend of mine, I realized that I was tagging my commits with
+the wrong committer credentials. I didn’t changed the project’s git config file with the right data, so git was taking
+the default data contained in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.gitconfig&lt;/code&gt; file. I already had done multiple interleaved commits with my
+friend’s, so it was not possible to make a simple amend to the last commit: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git commit --amend --author &quot;Author &amp;lt;new@email.com&amp;gt;&quot; --no-edit&lt;/code&gt;
+Moreover, the previous solution does not preserve the time of the commit, as it updates it to the current time.&lt;/p&gt;
+
+&lt;p&gt;Fortunately we can use a combination of Git commands to perform the required task. We can use the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;filter-branch&lt;/code&gt; command 
+with the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;--commitFilter&lt;/code&gt; argument to rewrite the Git revision history by rewriting the branches specified applying a
+filter all along the history: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git filter-branch --commitFilter &amp;lt;filter-command&amp;gt; &amp;lt;branch&amp;gt;&lt;/code&gt;. The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-f&lt;/code&gt; option can be 
+used to force update the refs.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;filter-command&amp;gt;&lt;/code&gt; is introduced between ‘ symbols and can include Git variables such as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GIT_AUTHOR_NAME&lt;/code&gt; or 
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GIT_AUTHOR_EMAIL&lt;/code&gt;. So, as I wanted to change my commits, I had to look for the committer name and if it was me, change
+the commit metadata accordingly to my new requirements. To create the new commit, we’ll use the Git &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;commit-tree&lt;/code&gt;
+command, which creates a new commit based on the provided tree object, emiting the new commit id on the standard output.&lt;/p&gt;
+
+&lt;p&gt;I created a gist with a small shell script to automate the task:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/5122ea5be99fc71f2a8d8912a15ed921.js&quot;&gt; &lt;/script&gt;
+
+&lt;p&gt;The output after executing the script is similar to this:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Rewrite df3205e092bee16b3ae05a6e7c46847bf0a9ac0b (31/33) (2 seconds passed, remaining 0 predicted)
+Ref 'refs/heads/master' was rewritten
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Once the refs have been rewritten, we need to update the remote repo using the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git push -f&lt;/code&gt; command to force the push.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 02 Aug 2016 06:05:00 +0000</pubDate>
+        <link>http://francisco-perez-sorrosal.github.io/git/commit/metadata/rewrite/tricks/2016/08/02/git-change-committer-data.html</link>
+        <guid isPermaLink="true">http://francisco-perez-sorrosal.github.io/git/commit/metadata/rewrite/tricks/2016/08/02/git-change-committer-data.html</guid>
+        
+        
+        <category>git</category>
+        
+        <category>commit</category>
+        
+        <category>metadata</category>
+        
+        <category>rewrite</category>
+        
+        <category>tricks</category>
+        
+      </item>
+    
+      <item>
+        <title>A Ruby Gem to add content of Github files ot Jekyll</title>
+        <description>&lt;p&gt;It’s been a while since last time I used Ruby, and I had the perfect excuse to come back to it when I was looking for 
+a solution to inject content of Github files in &lt;a href=&quot;https://jekyllrb.com/&quot;&gt;Jekyll&lt;/a&gt; generated websites, and I could not 
+find a github-pages solution to do that (there’s only a tag for including gists, but not a file or a part of it. See &lt;a href=&quot;https://github.com/jekyll/jekyll/issues/463&quot;&gt;this&lt;/a&gt;)&lt;/p&gt;
+
+&lt;p&gt;I took some inspiration in a Gem I found for including &lt;a href=&quot;http://blog.55minutes.com/2012/03/liquid-gist-tag-for-jekyll/&quot;&gt;gists&lt;/a&gt;
+and I started developing my own gem. I never developed a gem before, so I decided to download RubyMine and use the
+default template they have for that. With the help of the &lt;a href=&quot;http://guides.rubygems.org/make-your-own-gem/&quot;&gt;guides&lt;/a&gt; in
+rubygems.org, I adapted some minor stuff to make the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.gemfile&lt;/code&gt; ready for my gem, so I was ready to start developing.&lt;/p&gt;
+
+&lt;p&gt;I decided to create a single module (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;JekyllGithubContent&lt;/code&gt;) to encompass the classes of the Gem. Here is the resulting
+file (injected using the gem :-):&lt;/p&gt;
+
+&lt;div class=&quot;github-file&quot;&gt;
+  &lt;div class=&quot;meta-info&quot;&gt;
+    Github file by &lt;a href=&quot;https://github.com/francisco-perez-sorrosal&quot;&gt;francisco-perez-sorrosal&lt;/a&gt;
+    &lt;br /&gt;
+    Repo: &lt;a href=&quot;https://github.com/francisco-perez-sorrosal/jekyll-github-content&quot;&gt;jekyll-github-content&lt;/a&gt;
+    &lt;br /&gt;
+    File: lib/jekyll_github_content.rb &lt;a href=&quot;https://raw.githubusercontent.com/francisco-perez-sorrosal/jekyll-github-content/master/lib/jekyll_github_content.rb&quot;&gt;Raw view&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;table class=&quot;rouge-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rd&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;party&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;libs&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;active_support&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;liquid&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;JekyllGithubContent&lt;/span&gt;
+
+  &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;GithubUriParser&lt;/span&gt;
+
+    &lt;span class=&quot;no&quot;&gt;GITHUB_URI_ROOT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;https:&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//github.com/'&lt;/span&gt;
+    &lt;span class=&quot;no&quot;&gt;GITHUB_RAW_URI_ROOT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;https:&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//raw.githubusercontent.com'&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;attr_reader&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;repo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;initialize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;relative_path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;sub&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(/^&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;https&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;?&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//, '').sub(/^github.com/, '')&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;url_chunks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;relative_path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sc&quot;&gt;'/'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;delete_if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;empty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+      &lt;span class=&quot;nd&quot;&gt;@user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@repo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;blob&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@branch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;url_chunks&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;..&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+      &lt;span class=&quot;nd&quot;&gt;@file&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;url_chunks&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;..-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;])&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_raw_file_uri&lt;/span&gt;
+      &lt;span class=&quot;nc&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;GITHUB_RAW_URI_ROOT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@repo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@branch&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@file&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_user_uri&lt;/span&gt;
+      &lt;span class=&quot;nc&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;GITHUB_URI_ROOT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_repo_uri&lt;/span&gt;
+      &lt;span class=&quot;nc&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;GITHUB_URI_ROOT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@repo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+
+  &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;GithubContentRenderer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;Liquid:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Tag&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;initialize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tag_name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tokens&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@initial_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@end_line&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;split&lt;/span&gt;
+      &lt;span class=&quot;nd&quot;&gt;@github_file&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;GithubUriParser&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;nd&quot;&gt;@initial_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@end_line&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parse_line_boundaries&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@initial_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@end_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;kd&quot;&gt;super&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;render&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;file_lines&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cache&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;fetch&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@github_file&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;get_raw_file_uri&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@github_file&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;get_raw_file_uri&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;readlines&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;lines_to_print&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;file_lines&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@initial_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;..&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@end_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;lines_to_print&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;join&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;--------------------------------------------------------------------------------------------------------&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cache&lt;/span&gt;
+      &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@cache&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||=&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;ActiveSupport:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;Cache:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;MemoryStore&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;new&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;parse_line_boundaries&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;first_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;last_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;nil&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;last_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;nil&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;?&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;first_line&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;last_line&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;elsif&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;last_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;nil&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;?&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;last_line&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first_line&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+
+      &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;first_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;to_i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;last_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;to_i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+
+  &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;GithubMetaContentRenderer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;GithubContentRenderer&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;render&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DELIMITER&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;strip&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;=&quot;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;github&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&amp;gt;
+  &amp;lt;div class=&quot;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;meta&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&amp;gt;
+    Github file by &amp;lt;a href=&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@github_file&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;get_user_uri&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&amp;gt;#{@github_file.user}&amp;lt;/a&amp;gt;
+    &amp;lt;br&amp;gt;
+    Repo: &amp;lt;a href=&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@github_file&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;get_repo_uri&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&amp;gt;#{@github_file.repo}&amp;lt;/a&amp;gt;
+    &amp;lt;br&amp;gt;
+    File: #{@github_file.file} &amp;lt;a href=&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@github_file&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;get_raw_file_uri&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Raw&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;div&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;div&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;DELIMITER&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Register&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tag&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;names&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Liquid&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;allow&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;code&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;medadata&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;insertion&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Jekill&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;markdown&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;files&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;github_file&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_file_url_in_github&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;start_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;end_line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%}&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;github_fileref&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_file_url_in_github&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%}&lt;/span&gt;
+&lt;span class=&quot;nl&quot;&gt;Liquid:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;register_tag&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;github_file&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;JekyllGithubContent:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;GithubContentRenderer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;nl&quot;&gt;Liquid:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;register_tag&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;github_fileref&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;JekyllGithubContent:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;GithubMetaContentRenderer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Basically the gem is composed by three classes. The code is very simple and auto-commented, so it’s not worth to add
+something else:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;GithubUriParser - A parser that receives a path of a Github file and parses its contents for further use in the 
+other 2 classes.&lt;/li&gt;
+  &lt;li&gt;GithubContentRenderer - The responsible of rendering the file contents with the help of the previous class and the
+&lt;a href=&quot;https://shopify.github.io/liquid/&quot;&gt;Liquid&lt;/a&gt; templating engine.&lt;/li&gt;
+  &lt;li&gt;GithubMetaContentRenderer - An extension of the previous class that presents only the file metadata.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Finally the last two lines (94 and 95), are responsible the register the two new tags defined by the gem in order
+to inject the Github files. The Gem usage is described &lt;a href=&quot;https://github.com/francisco-perez-sorrosal/jekyll-github-content/blob/master/README.md&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Once the gem was ready, I opened an account in https://rubygems.org/ and I added my gem to the repo:&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Build the gem&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;gem build jekyll_github_content.gemspec
+&lt;span class=&quot;c&quot;&gt;# Push it to the rubygems repo&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;gem push jekyll_github_content-0.0.3.gem
+&lt;span class=&quot;c&quot;&gt;# Add your credentials and that's it!&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;At some point I had to create new version, and I wanted to get rid of the old ones in the public repo. We can achieve
+that with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gem yank jekyll_github_content -v 0.0.2&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;After installing and testing the gem locally with my Jekyll website, I was ready to commit the integration in my
+Jekyll website, which consists only in adding the gem to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Gemfile&lt;/code&gt; as it’s shown below, again using the gem:&lt;/p&gt;
+
+&lt;div class=&quot;github-file&quot;&gt;
+  &lt;div class=&quot;meta-info&quot;&gt;
+    Github file by &lt;a href=&quot;https://github.com/francisco-perez-sorrosal&quot;&gt;francisco-perez-sorrosal&lt;/a&gt;
+    &lt;br /&gt;
+    Repo: &lt;a href=&quot;https://github.com/francisco-perez-sorrosal/francisco-perez-sorrosal.github.io&quot;&gt;francisco-perez-sorrosal.github.io&lt;/a&gt;
+    &lt;br /&gt;
+    File: Gemfile &lt;a href=&quot;https://raw.githubusercontent.com/francisco-perez-sorrosal/francisco-perez-sorrosal.github.io/source/Gemfile&quot;&gt;Raw view&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;table class=&quot;rouge-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;n&quot;&gt;source&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;https:&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//rubygems.org'&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;gem&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;jekyll&quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;gem&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;html-proofer&quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;gem&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;github&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pages&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;group:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jekyll_plugins&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;gem&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jekyll_github_content&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;~&amp;gt;&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;group:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jekyll_plugins&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;In order to add the gem to the my &lt;a href=&quot;http://francisco-perez-sorrosal.github.io/&quot;&gt;github-pages website&lt;/a&gt;, as Github does 
+not admit external gems, I had to generate the website statically as I described &lt;a href=&quot;/jekyll/github-pages/github/website/tricks/blog/2016/07/22/jekyll-and-github-pages.html&quot;&gt;in this other blog post&lt;/a&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 25 Jul 2016 07:30:00 +0000</pubDate>
+        <link>http://francisco-perez-sorrosal.github.io/jekyll/github/content/files/website/2016/07/25/jekyll-github-content.html</link>
+        <guid isPermaLink="true">http://francisco-perez-sorrosal.github.io/jekyll/github/content/files/website/2016/07/25/jekyll-github-content.html</guid>
+        
+        
+        <category>jekyll</category>
+        
+        <category>github</category>
+        
+        <category>content</category>
+        
+        <category>files</category>
+        
+        <category>website</category>
+        
+      </item>
+    
+      <item>
+        <title>Adventures with Jekyll and Github pages</title>
+        <description>&lt;p&gt;When some years ago I was exploring tools for generating web sites for a project I stumbled upon &lt;a href=&quot;https://jekyllrb.com/&quot;&gt;Jekyll&lt;/a&gt;.
+In the end I didn’t used Jekyll for that project (I opt for &lt;a href=&quot;https://maven.apache.org/plugins/maven-site-plugin/&quot;&gt;Maven Site Plugin&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;the &lt;a href=&quot;https://maven.apache.org/skins/&quot;&gt;Fluido Skin&lt;/a&gt; in the end). However, when I decided to start my webpage/blog
+in Github pages, I decided to start using Jekyll as it was the default no-brainer option.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;It was pretty easy and quick to start building the website and publish the contents to Github. These are the basic steps
+once you have installed Ruby in your system and created a project in Github for storing your website sources (note that
+the repo name should be &lt;username&gt;.github.io):&lt;/username&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;gem &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;jekyll
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;jekyll new &amp;lt;username&amp;gt;.github.io
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; &amp;lt;username&amp;gt;.github.io
+&lt;span class=&quot;c&quot;&gt;# Here you are supposed to add the content of your website, and when finishing, you push it to Github&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git init
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git remote add origin git@github.com/&amp;lt;username&amp;gt;/&amp;lt;username&amp;gt;.github.io
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git add &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git commit &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;First version of my website&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;After pushing, Github compiles the Jekyll website in your repo and generates automatically a static website, showing it
+under the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://&amp;lt;username&amp;gt;.github.io&lt;/code&gt; domain name as &lt;a href=&quot;http://francisco-perez-sorrosal.github.io&quot;&gt;my site&lt;/a&gt; is shown.
+So far, so good if you are not using Jekyll plugins or you use the standard github-pages plugins accepted by &lt;a href=&quot;https://help.github.com/articles/adding-jekyll-plugins-to-a-github-pages-site/&quot;&gt;Github&lt;/a&gt;.
+For example, at some point, I wanted to generate the sitemap for my website, so I just had to include the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll-sitemap&lt;/code&gt;
+&lt;a href=&quot;https://github.com/jekyll/jekyll-sitemap&quot;&gt;gem&lt;/a&gt; in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_config.yml&lt;/code&gt; file of Jekyll.&lt;/p&gt;
+
+&lt;p&gt;However, I needed to add my own Gem containing a Jekyll plugin, so I had to generate locally the static content of my
+website and push it to Github. That fact obliged me to change the way I organized the Github repo of the website. After
+taking a look at different options I went for this one; the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; branch will contain the static website generated
+locally and I would create a new branch &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;source&lt;/code&gt; for holding the Jekyll code and the website sources and my docs.&lt;/p&gt;
+
+&lt;p&gt;In order to do that, I first created the new branch &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;source&lt;/code&gt; without including the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_site&lt;/code&gt; directory, so I add that dir
+to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.gitignore&lt;/code&gt;. Then, I pushed the contents to the new branch in the remote repo and I track it locally. After
+this step I had the important data in the new branch. Now, I had to take care of the generated static content of the
+website that has to be shown through the Github pages. So, I cleaned up the contents in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_site&lt;/code&gt; dir, I removed the
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; branch and I created a new repo tracking the remote  &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; branch locally, associated to the
+directory contents. This is the summary of the steps I had to do:&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; &amp;lt;username&amp;gt;.github.io
+&lt;span class=&quot;c&quot;&gt;# Assuming we are in the master branch&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git checkout &lt;span class=&quot;nt&quot;&gt;-b&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;source&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# Now we're in the source branch&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo &lt;/span&gt;_site/ &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; .gitignore
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git add &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git ci &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Do not keep track of _site dir&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push &lt;span class=&quot;nt&quot;&gt;--set-upstream&lt;/span&gt; origin &lt;span class=&quot;nb&quot;&gt;source&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git branch &lt;span class=&quot;nt&quot;&gt;-D&lt;/span&gt; master
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;_site
+&lt;span class=&quot;c&quot;&gt;# Now we're in a directory that is not associated to git so...&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git init
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git remote add origin https://github.com/&amp;lt;username&amp;gt;/&amp;lt;username&amp;gt;.github.io
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--set-upstream&lt;/span&gt; origin master
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;So now, pushes under the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_site&lt;/code&gt; directory will update the website contents remotely. Let’s try it!&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Assuming that we're still in the _site dir...&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..
+&lt;span class=&quot;c&quot;&gt;# Now we should be in the root of the project in the source branch! Let's check it!&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git branch
+&lt;span class=&quot;c&quot;&gt;# Let's generate the static website...&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;jekyll build
+&lt;span class=&quot;c&quot;&gt;# Now the new content should be in _site/ so...&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;_site
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git add &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git commit &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;New version&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;At this point, if we go to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://&amp;lt;username&amp;gt;.github.io&lt;/code&gt; we should see the new static website we’ve just generated and
+pushed to Github.&lt;/p&gt;
+
+&lt;p&gt;So, we’ve seen how to separate the static content of our website from the Jekyll metadata and our metadata content in
+two separate branches under our Github pages project. Apart of having to commit twice every time that you change the
+contents of your website, this solution has another drawback; if we do a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll clean&lt;/code&gt; we’ll wipe out the contents 
+of the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_site&lt;/code&gt; dir, so we’ll have to generate again the repo and associate it with the remote &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; branch.&lt;/p&gt;
+</description>
+        <pubDate>Fri, 22 Jul 2016 06:30:00 +0000</pubDate>
+        <link>http://francisco-perez-sorrosal.github.io/jekyll/github-pages/github/website/tricks/blog/2016/07/22/jekyll-and-github-pages.html</link>
+        <guid isPermaLink="true">http://francisco-perez-sorrosal.github.io/jekyll/github-pages/github/website/tricks/blog/2016/07/22/jekyll-and-github-pages.html</guid>
+        
+        
+        <category>jekyll</category>
+        
+        <category>github-pages</category>
+        
+        <category>github</category>
+        
+        <category>website</category>
+        
+        <category>tricks</category>
+        
+        <category>blog</category>
+        
+      </item>
+    
+      <item>
+        <title>Facebook Ribosome Hiring Test Revisited</title>
+        <description>&lt;p&gt;In Dec. 2011 I had an interview with Facebook. They proposed a coding test
+to decipher a DNA string extracting the proteins that were coded in it.
+It was a nice test to play with strings with Java. Some weeks later, I don’t
+know why, I decided to re-code it. Despite I didn’t had the original text,
+I remembered enough details of the main function, so I took pen and paper 
+and I added the resulting code to my gists in Github:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/1468599.js&quot;&gt; &lt;/script&gt;
+
+&lt;p&gt;Some days ago, I stumbled upon a github project of a guy that had the complete
+text describing the problem and some examples of DNA strings and resulting
+proteins. So I though that it was a nice opportunity to check what I did
+some years ago :-) I wrote the required scaffolding and I checked my function.&lt;/p&gt;
+
+&lt;p&gt;Apart from some minor stuff, the function passed without problems the
+tests. I like it because is concise and clear, at least compared to other
+solutions that I’ve seen out there. Only 12 lines. And they could have 
+been only 11 if I had returned a list of strings, but it was less convenient 
+for the tests.&lt;/p&gt;
+
+&lt;p&gt;You can find the problem description and the solution 
+&lt;a href=&quot;https://github.com/francisco-perez-sorrosal/ribosome-facebook&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Also you can test it and play in just 3 lines. Concision!&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ git clone git@github.com:francisco-perez-sorrosal/ribosome-facebook.git
+$ mvn clean install assembly:single
+$ java -jar ribosome-1.0-SNAPSHOT.jar dnastring1.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</description>
+        <pubDate>Tue, 12 Jul 2016 04:35:00 +0000</pubDate>
+        <link>http://francisco-perez-sorrosal.github.io/java/hiring/test/2011/facebook/dna/strings/2016/07/12/facebook-ribosome.html</link>
+        <guid isPermaLink="true">http://francisco-perez-sorrosal.github.io/java/hiring/test/2011/facebook/dna/strings/2016/07/12/facebook-ribosome.html</guid>
+        
+        
+        <category>java</category>
+        
+        <category>hiring</category>
+        
+        <category>test</category>
+        
+        <category>2011</category>
+        
+        <category>facebook</category>
+        
+        <category>dna</category>
+        
+        <category>strings</category>
+        
+      </item>
+    
+  </channel>
+</rss>

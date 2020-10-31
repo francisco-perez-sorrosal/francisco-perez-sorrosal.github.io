@@ -68,7 +68,7 @@ The bibliography will appear as a separate section in your book.
 using the following syntax:
 
 ```
-{{#cite my-citation-key}}
+\{{#cite my-citation-key}}
 ``` 
 
 For now, only authors, title and date are shown in the generated bibliography, but any other field can be added with 

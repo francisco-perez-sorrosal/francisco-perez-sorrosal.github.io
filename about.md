@@ -4,32 +4,28 @@ title: Francisco Perez-Sorrosal
 permalink: /about/
 ---
 
-I’m a detail-focused and result-oriented software engineer with experience in research environments. Interested mainly
--although not only- in distributed and transactional systems, I'm currently working on big data and mobile cloud
-platforms & apps in a great multicultural environment. I love to learn new technologies, programming languages and
-techniques, and I like to apply this knowledge in building reliable and scalable systems serving millions of people.
-I'm also a contributor and committer in the [Omid](http://omid.incubator.apache.org/) project at the
-[Apache Software Foundation](http://www.apache.org/).
+I’m a goal-oriented and detail-focused human with experience in both research and software engineering, particularly in the fields of machine learning (ML), artificial intelligence (AI), and distributed systems. As a Research Engineer, I love exploring and implementing cutting-edge technologies, now particularly in AI/ML, to tackle complex challenges and foster innovation. As a Software Engineer, I can design, develop, and prepare for maintenance robust and scalable big data applications on premises or cloud platforms, ensuring high performance, scalability, and reliability. I am adaptable, i.e. capable of acting with agency to take initiative and lead efforts when needed, or collaborating as a committed team member to achieve shared goals. I thrive in open, dynamic, multicultural/multidisciplinary environments, where I could integrate research-driven insights with practical engineering solutions to deliver impactful results.
 
-As a research software engineer, I've developed incremental processing frameworks and other scalable services at
-[Yahoo](https://www.yahoo.com/). Also, for [Atos/BULL SAS France](http://www.bull.com/), I implemented the replication
-and recovery protocols for their JEE app. server, [JOnAS](https://en.wikipedia.org/wiki/JOnAS). I participated in
-multiple European and National (Spanish) research projects such as CumuloNimbo, ADAPT, S4All, AUTONOMIC and NEXOF. 
-In all those projects, I designed and developed highly available and scalable architectures and systems; e.g. I
-implemented a transaction-aware replicated cache for application servers; I open-sourced versions of 
-[JEE Activity Service and WS-CAF specs](http://download.forge.ow2.org/jass/). and I built replication frameworks for
-providing high-availability to stateful services. Last but not least, I've also worked as a freelance, developing a web
-application in Ruby on Rails.
+Currently, I am deeply interested in agentic technologies and decision making, which I believe will play a transformative role in shaping the next generation of applications set to revolutionize the software industry in the coming years. In my opinion, these technologies, driven by advancements in AI and software/hardware engineering, have the potential to enable systems that are capable of proactive decision-making, continuous learning, and adaptive behavior. My focus is on exploring how these capabilities can be harnessed to build intelligent, interactive, and dynamic applications that redefine user experiences and operational efficiency.
 
-I got my Ph.D. from [Universidad Politecnica de Madrid](https://www.fi.upm.es/), whilst working at the Distributed
-Systems Lab (LSD). My [Ph.D. Thesis]({{site.baseurl}}/docs/phd/MiddlewareForHighAvailableAndScalableMultiTierAndServiceOrientedArchitectures-FranciscoPerezSorrosal-PhDThesis.pdf)
-describes protocols for the consistent replication of transactional-aware middleware. I published papers in top
-conferences and journals, such as WWW, ICDCS, Middleware and VLDB Journal. During that period, I also had an internship
-at [INRIA (France)](http://www.inria.fr/en/) for working on the integration autonomic computing features in my projects.
+Since the popularization of Deep Learning around 2017, I have had the opportunity to expand my expertise into the fields of machine learning/artificial intelligence, focusing primarily on natural language processing (NLP). I began by utilizing classical algorithms such as Support Vector Machines (SVMs) and Random Forests for binary classification tasks, including detecting clickbait news articles. In these projects, I emphasized feature engineering and model optimization to achieve high accuracy and robust performance.
 
-Before my time at LSD, I worked as lecturer at the Madrid Campus of the School of CS of Univ. Pontificia de Salamanca
-during two academic years. There, I taught the basics of programming and operating systems to undergraduate students.
-Previously, I also worked as UNIX system admin at that same university and as a quality analyst (QA) of the DB modules
-of [Meta4's](http://www.meta4.com/) ERP suite.
+Building on this foundation, I transitioned to deep learning, where I designed and trained neural networks for more complex classification tasks, including multiclass and multilabel problems. My experience includes experimenting with custom architectures tailored to specific datasets, leveraging state-of-the-art frameworks such as TensorFlow and later PyTorch, and fine-tuning models to optimize metrics such as precision, recall, and computational efficiency.
+
+Around 2019, I also ventured into generative AI, working on early proofs of concept for binary classification tasks using T5 and exploring its capabilities in NLP. Later, with the generalization of large language models (LLMs), I successfully fine-tuned an LLM for language style adaptation. 
+
+Through my involvement in these diverse range of ML/AI projects, I aimed to deepen my understanding and enhance my ability to tackle new complex and challenging problem domains using both traditional and generative AI approaches. Additionally, in collaboration with my colleagues, we achieved research contributions, including publications in prestigious venues/journals such as ACL, SIGKDD, and TKDE.
+
+I was a core contributor to [Apache](http://www.apache.org/) [Omid](http://omid.incubator.apache.org/), an open-source transactional system for the HBASE DB, where I played a pivotal role in enhancing its scalability, reliability, and overall functionality. My work included designing and implementing high-availability mechanisms, ensuring fault tolerance and uninterrupted service in distributed environments. I contributed to the optimization of Omid’s commit protocol, significantly improving its latency and throughput while preserving transactional consistency and isolation guarantees. Apart of its critical role in [Yahoo]](https://www.yahoo.com/)’s content ingestion platform, Omid’s success and robustness in the open-source community ultimately led to its integration into Apache Phoenix, where it continues to enable transactional guarantees for large-scale, cloud-native applications. At Yahoo, I've developed also an incremental processing framework and other scalable services (e.g. a Twitter Firehose.)
+
+In the past, I contributed to several European and Spanish national research projects, including CumuloNimbo, ADAPT, S4All, AUTONOMIC, and NEXOF. Across these initiatives, I designed and developed highly available and scalable architectures and software systems. Notable achievements include implementing a transaction-aware replicated cache for application servers, open-sourcing implementations of the [JEE Activity Service and WS-CAF](http://download.forge.ow2.org/jass/) specifications, and building replication frameworks to ensure high availability for stateful services. Additionally, while working with [Atos/BULL SAS France](http://www.bull.com/), I implemented replication and recovery protocols for their JEE application server, [JOnAS](https://en.wikipedia.org/wiki/JOnAS), enhancing its reliability and robustness.
+
+I earned my Ph.D. from [Universidad Politecnica de Madrid (UPM)](https://www.fi.upm.es/) while working at the Distributed Systems Lab (LSD). My [Ph.D. Thesis]({{site.baseurl}}/docs/phd/MiddlewareForHighAvailableAndScalableMultiTierAndServiceOrientedArchitectures-FranciscoPerezSorrosal-PhDThesis.pdf) focused on designing protocols for consistent replication in transaction-aware middleware. During this time, I published research in prestigious conferences and journals, including WWW, ICDCS, Middleware, and the VLDB Journal. Additionally, I completed an internship at [INRIA (France)](http://www.inria.fr/en/), where I contributed to integrating autonomic computing features into my projects, further enhancing their adaptability and resilience.
+
+Prior to my time at LSD, I spent two academic years as a assistant professor at the Madrid Campus of the School of CS, Universidad Pontificia de Salamanca. There, I taught undergraduate students foundational courses in programming and operating systems. Earlier in my career, I served as a UNIX System Administrator at the same university and worked as a Quality Analyst (QA), focusing on the database modules of [Meta4](http://www.meta4.com/)'s ERP suite, ensuring their reliability and performance.
+
+Apart from the research projects, I also worked at some point as a freelance developer, where I successfully built a web application using Ruby on Rails.
+
+Beyond my professional pursuits, I have a strong interest in the intersection of fields such as neuroscience, psychology, decision-making, cognitive sciences, learning techniques, behavioral economics, and philosophy, as they offer valuable insights into human behavior, intelligence, and how the brain works (and why!) I am deeply fascinated by the mechanisms of human thought, learning, and behavior, and how these insights can inform and inspire advancements in AI and our daily lives and wellbeing in general. In my personal life, I enjoy staying active through activities like running, mountain biking, yoga, cold-plunging, and playing tennis, which not only keep me physically fit but also provide a sense of balance and focus.
 
 ... All those moments will be lost in time, like tears in rain. Time to move forward!!! :-)

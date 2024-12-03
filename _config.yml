@@ -26,5 +26,5 @@ markdown: kramdown
 port: 8888
 
 # Plugins (Must be compatible with github)
-gems:
+plugins:
   - jekyll-sitemap

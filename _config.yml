@@ -28,4 +28,3 @@ port: 8888
 # Plugins (Must be compatible with github)
 plugins:
   - jekyll-sitemap
-  - jekyll_github_content

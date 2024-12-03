@@ -3,7 +3,7 @@ layout: page
 permalink: /cv/
 ---
 
-# Resumé
+# Curriculum Vitae
 
 [You can check my CV in this link]({{site.baseurl}}/docs/cv/FranciscoPerezSorrosalCVEnglish.pdf) (Last update Feb 2015)
 

@@ -8,14 +8,15 @@
 include: [.nojekyll]
 
 # Site settings
-title: Software Pieces
+title: >
+  Symbiotic Wetware: Software-based Extensions for the Human Mind
 email: fperezsorrosal @ gmail.com
 description: > # this means to ignore newlines until "baseurl:"
-  This site contains bits and b[iy]tes of software I've compiled
-  in the last few years. Hope this can be useful for other passionate
-  software engineers.
+  This site contains bits and b[iy]tes of information I've compiled
+  in the last few years.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "http://francisco-perez-sorrosal.github.io" # the base hostname & protocol for your site
+linkedin_username: fperezsorrosal
 twitter_username: fperezsorrosal
 github_username:  francisco-perez-sorrosal
 
